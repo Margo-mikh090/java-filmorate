@@ -24,7 +24,7 @@ public class UserTest {
     }
 
     @Test
-    void CorrectUserTest() {
+    void correctUserTest() {
         User user = new User("margomargo123@gmail.com", "testlogin", null, LocalDate.now());
         Set<ConstraintViolation<User>> violations = validator.validate(user);
         assertTrue(violations.isEmpty());
