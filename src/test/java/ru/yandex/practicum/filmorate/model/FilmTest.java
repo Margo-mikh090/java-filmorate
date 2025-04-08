@@ -40,8 +40,8 @@ public class FilmTest {
         violations.addAll(validator.validate(film2));
         violations.addAll(validator.validate(film3));
         assertEquals(3, violations.size());
-        assertThat(violations).extracting(ConstraintViolation::getMessage).containsExactlyInAnyOrder
-                        ("Название не может быть пустым",
+        assertThat(violations).extracting(ConstraintViolation::getMessage)
+                .containsExactlyInAnyOrder("Название не может быть пустым",
                         "Название не может быть пустым",
                         "Название не может быть пустым");
     }
@@ -54,8 +54,8 @@ public class FilmTest {
         violations.addAll(validator.validate(film1));
         violations.addAll(validator.validate(film2));
         assertEquals(1, violations.size());
-        assertThat(violations).extracting(ConstraintViolation::getMessage).containsExactlyInAnyOrder
-                ("Описание не должно превышать 200 символов");
+        assertThat(violations).extracting(ConstraintViolation::getMessage)
+                .containsExactlyInAnyOrder("Описание не должно превышать 200 символов");
     }
 
     @Test
@@ -68,8 +68,8 @@ public class FilmTest {
         violations.addAll(validator.validate(film2));
         violations.addAll(validator.validate(film3));
         assertEquals(1, violations.size());
-        assertThat(violations).extracting(ConstraintViolation::getMessage).containsExactlyInAnyOrder
-                ("Дата релиза не может быть раньше 28 декабря 1895 года");
+        assertThat(violations).extracting(ConstraintViolation::getMessage)
+                .containsExactlyInAnyOrder("Дата релиза не может быть раньше 28 декабря 1895 года");
     }
 
     @Test
@@ -80,8 +80,8 @@ public class FilmTest {
         violations.addAll(validator.validate(film1));
         violations.addAll(validator.validate(film2));
         assertEquals(2, violations.size());
-        assertThat(violations).extracting(ConstraintViolation::getMessage).containsExactlyInAnyOrder
-                ("Продолжительность фильма должна быть положительным числом",
+        assertThat(violations).extracting(ConstraintViolation::getMessage)
+                .containsExactlyInAnyOrder("Продолжительность фильма должна быть положительным числом",
                         "Продолжительность фильма должна быть положительным числом");
     }
 }

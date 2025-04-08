@@ -40,8 +40,8 @@ public class UserTest {
         violations.addAll(validator.validate(user2));
         violations.addAll(validator.validate(user3));
         assertEquals(3, violations.size());
-        assertThat(violations).extracting(ConstraintViolation::getMessage).containsExactlyInAnyOrder
-                ("Электронная почта должна соответствовать своему формату",
+        assertThat(violations).extracting(ConstraintViolation::getMessage)
+                .containsExactlyInAnyOrder("Электронная почта должна соответствовать своему формату",
                         "Электронная почта должна соответствовать своему формату",
                         "Электронная почта не может быть пустой");
     }
@@ -54,8 +54,8 @@ public class UserTest {
         violations.addAll(validator.validate(user1));
         violations.addAll(validator.validate(user2));
         assertEquals(2, violations.size());
-        assertThat(violations).extracting(ConstraintViolation::getMessage).containsExactlyInAnyOrder
-                ("Логин не может быть пустым",
+        assertThat(violations).extracting(ConstraintViolation::getMessage)
+                .containsExactlyInAnyOrder("Логин не может быть пустым",
                         "Логин не может содержать пробелы");
     }
 
@@ -67,7 +67,7 @@ public class UserTest {
         violations.addAll(validator.validate(user1));
         violations.addAll(validator.validate(user2));
         assertEquals(1, violations.size());
-        assertThat(violations).extracting(ConstraintViolation::getMessage).containsExactlyInAnyOrder
-                ("Дата рождения не может быть в будущем");
+        assertThat(violations).extracting(ConstraintViolation::getMessage)
+                .containsExactlyInAnyOrder("Дата рождения не может быть в будущем");
     }
 }
