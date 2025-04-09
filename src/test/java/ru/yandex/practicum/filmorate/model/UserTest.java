@@ -12,8 +12,6 @@ import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class UserTest {
     private Validator validator;
@@ -27,7 +25,7 @@ public class UserTest {
     void correctUserTest() {
         User user = new User("margomargo123@gmail.com", "testlogin", null, LocalDate.now());
         Set<ConstraintViolation<User>> violations = validator.validate(user);
-        assertTrue(violations.isEmpty());
+        assertThat(violations).hasSize(0);
     }
 
     @Test
@@ -39,7 +37,7 @@ public class UserTest {
         violations.addAll(validator.validate(user1));
         violations.addAll(validator.validate(user2));
         violations.addAll(validator.validate(user3));
-        assertEquals(3, violations.size());
+        assertThat(violations).hasSize(3);
         assertThat(violations).extracting(ConstraintViolation::getMessage)
                 .containsExactlyInAnyOrder("Электронная почта должна соответствовать своему формату",
                         "Электронная почта должна соответствовать своему формату",
@@ -53,7 +51,7 @@ public class UserTest {
         List<ConstraintViolation<User>> violations = new ArrayList<>();
         violations.addAll(validator.validate(user1));
         violations.addAll(validator.validate(user2));
-        assertEquals(2, violations.size());
+        assertThat(violations).hasSize(2);
         assertThat(violations).extracting(ConstraintViolation::getMessage)
                 .containsExactlyInAnyOrder("Логин не может быть пустым",
                         "Логин не может содержать пробелы");
@@ -66,7 +64,7 @@ public class UserTest {
         List<ConstraintViolation<User>> violations = new ArrayList<>();
         violations.addAll(validator.validate(user1));
         violations.addAll(validator.validate(user2));
-        assertEquals(1, violations.size());
+        assertThat(violations).hasSize(1);
         assertThat(violations).extracting(ConstraintViolation::getMessage)
                 .containsExactlyInAnyOrder("Дата рождения не может быть в будущем");
     }

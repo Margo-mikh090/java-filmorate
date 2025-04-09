@@ -2,10 +2,9 @@ package ru.yandex.practicum.filmorate.model;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.Data;
+import ru.yandex.practicum.filmorate.annotation.Marker;
 import ru.yandex.practicum.filmorate.annotation.NotBeforeMovieBD;
 import ru.yandex.practicum.filmorate.serializer.LocalDateDeserializer;
 import ru.yandex.practicum.filmorate.serializer.LocalDateSerializer;
@@ -14,6 +13,8 @@ import java.time.LocalDate;
 
 @Data
 public class Film {
+    @Null(groups = Marker.OnCreate.class)
+    @NotNull(groups = Marker.OnUpdate.class)
     private Integer id;
 
     @NotBlank(message = "Название не может быть пустым")

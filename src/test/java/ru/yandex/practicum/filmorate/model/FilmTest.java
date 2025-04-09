@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 public class FilmTest {
     private Validator validator;
@@ -26,7 +25,7 @@ public class FilmTest {
     void correctFilmTest() {
         Film film = new Film("name", "description", LocalDate.now(), 120);
         Set<ConstraintViolation<Film>> violations = validator.validate(film);
-        assertTrue(violations.isEmpty());
+        assertThat(violations).hasSize(0);
     }
 
     @Test
@@ -39,7 +38,7 @@ public class FilmTest {
         violations.addAll(validator.validate(film1));
         violations.addAll(validator.validate(film2));
         violations.addAll(validator.validate(film3));
-        assertEquals(3, violations.size());
+        assertThat(violations).hasSize(3);
         assertThat(violations).extracting(ConstraintViolation::getMessage)
                 .containsExactlyInAnyOrder("Название не может быть пустым",
                         "Название не может быть пустым",
@@ -53,7 +52,7 @@ public class FilmTest {
         List<ConstraintViolation<Film>> violations = new ArrayList<>();
         violations.addAll(validator.validate(film1));
         violations.addAll(validator.validate(film2));
-        assertEquals(1, violations.size());
+        assertThat(violations).hasSize(1);
         assertThat(violations).extracting(ConstraintViolation::getMessage)
                 .containsExactlyInAnyOrder("Описание не должно превышать 200 символов");
     }
@@ -67,7 +66,7 @@ public class FilmTest {
         violations.addAll(validator.validate(film1));
         violations.addAll(validator.validate(film2));
         violations.addAll(validator.validate(film3));
-        assertEquals(1, violations.size());
+        assertThat(violations).hasSize(1);
         assertThat(violations).extracting(ConstraintViolation::getMessage)
                 .containsExactlyInAnyOrder("Дата релиза не может быть раньше 28 декабря 1895 года");
     }
@@ -79,7 +78,7 @@ public class FilmTest {
         List<ConstraintViolation<Film>> violations = new ArrayList<>();
         violations.addAll(validator.validate(film1));
         violations.addAll(validator.validate(film2));
-        assertEquals(2, violations.size());
+        assertThat(violations).hasSize(2);
         assertThat(violations).extracting(ConstraintViolation::getMessage)
                 .containsExactlyInAnyOrder("Продолжительность фильма должна быть положительным числом",
                         "Продолжительность фильма должна быть положительным числом");

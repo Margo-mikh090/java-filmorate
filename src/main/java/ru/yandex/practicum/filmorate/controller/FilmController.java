@@ -2,8 +2,9 @@ package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.ConditionsNotMetException;
+import ru.yandex.practicum.filmorate.annotation.Marker;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 
@@ -24,6 +25,7 @@ public class FilmController {
     }
 
     @PostMapping
+    @Validated(Marker.OnCreate.class)
     public Film create(@Valid @RequestBody Film film) {
         log.info("Запрос на добавление фильма с параметрами {}", film);
         film.setId(getNextId());
@@ -33,30 +35,27 @@ public class FilmController {
     }
 
     @PutMapping
+    @Validated(Marker.OnUpdate.class)
     public Film update(@Valid @RequestBody Film filmToUpdate) {
         log.info("Запрос на изменение фильма с параметрами {}", filmToUpdate);
         Integer id = filmToUpdate.getId();
-        if (id == null) {
-            log.warn("Ошибка обновления фильма. Не указан id");
-            throw new ConditionsNotMetException("Id должен быть указан");
+        if (!films.containsKey(id)) {
+            log.warn("Ошибка обновления фильма. Фильм не найден");
+            throw new NotFoundException("Фильм с данным id не найден");
         }
-        if (films.containsKey(id)) {
-            Film oldFilm = films.get(id);
-            oldFilm.setName(filmToUpdate.getName());
-            if (filmToUpdate.getDescription() != null) {
-                oldFilm.setDescription(filmToUpdate.getDescription());
-            }
-            if (filmToUpdate.getReleaseDate() != null) {
-                oldFilm.setReleaseDate(filmToUpdate.getReleaseDate());
-            }
-            if (filmToUpdate.getDuration() != null) {
-                oldFilm.setDuration(filmToUpdate.getDuration());
-            }
-            log.info("Фильм успешно обновлен с параметрами {}", oldFilm);
-            return oldFilm;
+        Film oldFilm = films.get(id);
+        oldFilm.setName(filmToUpdate.getName());
+        if (filmToUpdate.getDescription() != null) {
+            oldFilm.setDescription(filmToUpdate.getDescription());
         }
-        log.warn("Ошибка обновления фильма. Фильм не найден");
-        throw new NotFoundException("Фильм с данным id не найден");
+        if (filmToUpdate.getReleaseDate() != null) {
+            oldFilm.setReleaseDate(filmToUpdate.getReleaseDate());
+        }
+        if (filmToUpdate.getDuration() != null) {
+            oldFilm.setDuration(filmToUpdate.getDuration());
+        }
+        log.info("Фильм успешно обновлен с параметрами {}", oldFilm);
+        return oldFilm;
     }
 
     private int getNextId() {
