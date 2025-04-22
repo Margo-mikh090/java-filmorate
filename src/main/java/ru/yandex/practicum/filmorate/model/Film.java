@@ -10,6 +10,8 @@ import ru.yandex.practicum.filmorate.serializer.LocalDateDeserializer;
 import ru.yandex.practicum.filmorate.serializer.LocalDateSerializer;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 public class Film {
@@ -30,6 +32,8 @@ public class Film {
 
     @Positive(message = "Продолжительность фильма должна быть положительным числом")
     private Integer duration;
+
+    private final Set<Integer> userLikes = new HashSet<>();
 
     public Film(String name, String description, LocalDate releaseDate, Integer duration) {
         this.name = name;

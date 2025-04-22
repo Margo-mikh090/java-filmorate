@@ -10,6 +10,8 @@ import ru.yandex.practicum.filmorate.serializer.LocalDateSerializer;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 public class User {
@@ -33,6 +35,8 @@ public class User {
     private LocalDate birthday;
 
     public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+    private final Set<Integer> friends = new HashSet<>();
 
     public User(String email, String login, String name, LocalDate birthday) {
         this.email = email;
