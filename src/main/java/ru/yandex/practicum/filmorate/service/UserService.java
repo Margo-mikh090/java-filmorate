@@ -40,8 +40,8 @@ public class UserService {
         log.info("Запрос на добавление в друзья от пользователя с id {} пользователю с id {}", fromId, toId);
         User fromUser = userStorage.getById(fromId);
         User toUser = userStorage.getById(toId);
-        fromUser.getFriends().add(toId);
-        toUser.getFriends().add(fromId);
+        fromUser.addFriend(toId);
+        toUser.addFriend(fromId);
         log.info("Успешное добавления в друзья пользователей с id {} и {}", fromId, toId);
     }
 
@@ -49,8 +49,8 @@ public class UserService {
         log.info("Запрос на удаление друга от пользователя с id {} пользователю с id {}", fromId, toId);
         User fromUser = userStorage.getById(fromId);
         User toUser = userStorage.getById(toId);
-        fromUser.getFriends().remove(toId);
-        toUser.getFriends().remove(fromId);
+        fromUser.removeFriend(toId);
+        toUser.removeFriend(fromId);
         log.info("Успешное удаление друга пользователей с id {} и {}", fromId, toId);
     }
 

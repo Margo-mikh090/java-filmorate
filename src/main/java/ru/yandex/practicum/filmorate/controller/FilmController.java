@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.annotation.Marker;
+import ru.yandex.practicum.filmorate.exception.ConditionsNotMetException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
@@ -56,6 +57,10 @@ public class FilmController {
 
     @GetMapping("/popular")
     public List<Film> getRating(@RequestParam(defaultValue = "10") int count) {
+        if (count <= 0) {
+            throw new ConditionsNotMetException("Кол-во фильмов должно быть положительным числом, введенное значение - "
+                    + count);
+        }
         return filmService.getRating(count);
     }
 }

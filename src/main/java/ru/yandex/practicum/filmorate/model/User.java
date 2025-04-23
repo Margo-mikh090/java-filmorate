@@ -44,4 +44,12 @@ public class User {
         this.name = name;
         this.birthday = birthday;
     }
+
+    public void addFriend(int id) {
+        friends.add(id);
+    }
+
+    public void removeFriend(int id) {
+        friends.remove(id);
+    }
 }

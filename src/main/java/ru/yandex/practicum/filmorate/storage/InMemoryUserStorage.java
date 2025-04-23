@@ -24,8 +24,7 @@ public class InMemoryUserStorage implements UserStorage {
     public User getById(int id) {
         log.info("Запрос на получение пользователя с id {}", id);
         if (!users.containsKey(id)) {
-            log.warn("Ошибка get-запроса: Пользователь с id {} не найден", id);
-            throw new NotFoundException("Пользователь с данным id не найден");
+            throw new NotFoundException("Пользователь с id " + id + " не найден");
         }
         return users.get(id);
     }
@@ -34,8 +33,7 @@ public class InMemoryUserStorage implements UserStorage {
     public void deleteById(int id) {
         log.info("Запрос на удаление пользователя с id {}", id);
         if (!users.containsKey(id)) {
-            log.warn("Ошибка delete-запроса: Пользователь с id {} не найден", id);
-            throw new NotFoundException("Пользователь с данным id не найден");
+            throw new NotFoundException("Пользователь с id " + id + " не найден");
         }
         users.remove(id);
     }
@@ -57,8 +55,7 @@ public class InMemoryUserStorage implements UserStorage {
         log.info("Запрос на изменение пользователя с параметрами {}", userToUpdate);
         Integer id = userToUpdate.getId();
         if (!users.containsKey(id)) {
-            log.warn("Ошибка put-запроса: Пользователь с id {} не найден", id);
-            throw new NotFoundException("Пользователь с данным id не найден");
+            throw new NotFoundException("Пользователь с id " + id + " не найден");
         }
         User oldUser = users.get(id);
         oldUser.setEmail(userToUpdate.getEmail());

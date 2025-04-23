@@ -24,8 +24,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     public Film getById(int id) {
         log.info("Запрос на получение фильма с id {}", id);
         if (!films.containsKey(id)) {
-            log.warn("Ошибка get-запроса: Фильм с id {} не найден", id);
-            throw new NotFoundException("Фильм с данным id не найден");
+            throw new NotFoundException("Фильм с id " + id + " не найден");
         }
         return films.get(id);
     }
@@ -34,8 +33,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     public void deleteById(int id) {
         log.info("Запрос на удаление фильма с id {}", id);
         if (!films.containsKey(id)) {
-            log.warn("Ошибка delete-запроса: Фильм с id {} не найден", id);
-            throw new NotFoundException("Фильм с данным id не найден");
+            throw new NotFoundException("Фильм с id " + id + " не найден");
         }
         films.remove(id);
     }
@@ -54,8 +52,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         log.info("Запрос на изменение фильма с параметрами {}", filmToUpdate);
         Integer id = filmToUpdate.getId();
         if (!films.containsKey(id)) {
-            log.warn("Ошибка put-запроса: Фильм с id {} не найден", id);
-            throw new NotFoundException("Фильм с данным id не найден");
+            throw new NotFoundException("Фильм с id " + id + " не найден");
         }
         Film oldFilm = films.get(id);
         oldFilm.setName(filmToUpdate.getName());

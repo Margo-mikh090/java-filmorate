@@ -43,7 +43,7 @@ public class FilmService {
         log.info("Запрос на добавление лайка к фильму с id {}", filmId);
         Film film = filmStorage.getById(filmId);
         User user = userStorage.getById(userId);
-        film.getUserLikes().add(user.getId());
+        film.addLike(user.getId());
         log.info("Лайк успешно добавлен у фильма с id {}", filmId);
     }
 
@@ -51,16 +51,12 @@ public class FilmService {
         log.info("Запрос на удаление лайка к фильму с id {}", filmId);
         Film film = filmStorage.getById(filmId);
         User user = userStorage.getById(userId);
-        film.getUserLikes().remove(user.getId());
+        film.removeLike(user.getId());
         log.info("Лайк успешно удален у фильма с id {}", filmId);
     }
 
     public List<Film> getRating(Integer count) {
         log.info("Запрос на получение списка {} фильмов по количеству лайков", count);
-        if (count <= 0) {
-            log.warn("Ошибка get-запроса: Значение count - {}", count);
-            throw new ConditionsNotMetException("Кол-во фильмов должно быть положительным числом");
-        }
         return filmStorage.getAll().stream()
                 .sorted((film1, film2) -> film2.getUserLikes().size() - film1.getUserLikes().size())
                 .limit(count)
