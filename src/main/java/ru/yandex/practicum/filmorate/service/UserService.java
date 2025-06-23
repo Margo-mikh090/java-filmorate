@@ -25,21 +25,29 @@ public class UserService {
     }
 
     public User getById(long id) {
+        log.info("Запрос на получение пользователя с id {}", id);
         User user = userStorage.getById(id);
-        System.out.println(user);
-        return userStorage.getById(id);
+        log.info("Успешное получение пользователя с id {}", id);
+        return user;
     }
 
     public void deleteById(long id) {
+        log.info("Запрос на удаление пользователя с id {}", id);
         userStorage.deleteById(id);
     }
 
     public User create(User user) {
-        return userStorage.create(user);
+        log.info("Запрос на создание пользователя с данными: {}", user);
+        User createdUser = userStorage.create(user);
+        log.info("Успешное создание пользователя с данными: {}", createdUser);
+        return createdUser;
     }
 
     public User update(User userToUpdate) {
-        return userStorage.update(userToUpdate);
+        log.info("Запрос на обновление пользователя с данными: {}", userToUpdate);
+        User updatedUser = userStorage.update(userToUpdate);
+        log.info("Успешное обновление пользователя с данными: {}", updatedUser);
+        return updatedUser;
     }
 
     public void addFriend(long fromId, long toId) {
@@ -58,7 +66,9 @@ public class UserService {
         log.info("Запрос на получение списка общих друзей пользователя с id {} пользователю с id {}", fromId, toId);
         Set<User> fromUserFriends = getUserFriends(fromId);
         Set<User> toUserFriends = getUserFriends(toId);
-        return fromUserFriends.stream().filter(toUserFriends::contains).collect(Collectors.toSet());
+        Set<User> commonFriends = fromUserFriends.stream().filter(toUserFriends::contains).collect(Collectors.toSet());
+        log.info("Успешное получение списка общих друзей пользователя с id {} пользователю с id {}", fromId, toId);
+        return commonFriends;
     }
 
     public Set<User> getUserFriends(long id) {

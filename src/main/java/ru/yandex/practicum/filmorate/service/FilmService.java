@@ -19,23 +19,36 @@ public class FilmService {
 
 
     public Collection<Film> getAll() {
-        return filmStorage.getAll();
+        log.info("Запрос на получение списка фильмов");
+        Collection<Film> films = filmStorage.getAll();
+        log.info("Успешное получение списка фильмов");
+        return films;
     }
 
     public Film getById(long id) {
-        return filmStorage.getById(id);
+        log.info("Запрос на получение фильма с id {}", id);
+        Film film = filmStorage.getById(id);
+        log.info("Успешное получение фильма с id {}", id);
+        return film;
     }
 
     public void deleteById(long id) {
+        log.info("Запрос на удаление фильма с id {}", id);
         filmStorage.deleteById(id);
     }
 
     public Film create(Film film) {
-        return filmStorage.create(film);
+        log.info("Запрос на создание фильма с данными: {}", film);
+        Film createdFilm = filmStorage.create(film);
+        log.info("Успешное создание фильма с данными: {}", createdFilm);
+        return createdFilm;
     }
 
     public Film update(Film filmToUpdate) {
-        return filmStorage.update(filmToUpdate);
+        log.info("Запрос на обновление фильма с данными: {}", filmToUpdate);
+        Film updatedFilm = filmStorage.update(filmToUpdate);
+        log.info("Успешное обновление фильма с данными: {}", updatedFilm);
+        return updatedFilm;
     }
 
     public void addLike(long filmId, long userId) {
@@ -52,6 +65,8 @@ public class FilmService {
 
     public List<Film> getRating(Integer count) {
         log.info("Запрос на получение списка {} фильмов по количеству лайков", count);
-        return filmStorage.getRating(count).stream().toList();
+        List<Film> rate = filmStorage.getRating(count).stream().toList();
+        log.info("Успешное получение списка {} фильмов по количеству лайков", count);
+        return rate;
     }
 }
