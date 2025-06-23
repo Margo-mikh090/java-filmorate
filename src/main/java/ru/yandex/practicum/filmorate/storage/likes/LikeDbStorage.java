@@ -18,7 +18,7 @@ public class LikeDbStorage {
         try {
             jdbc.update(ADD_LIKE, userId, filmId);
         } catch (DuplicateKeyException e) {
-
+            return;
         } catch (DataIntegrityViolationException e) {
             throw new NotFoundException("Данные не найдены");
         }

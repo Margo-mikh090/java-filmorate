@@ -34,7 +34,7 @@ public class GenreDbStorage extends BaseDbStorage<Genre> {
         try {
             jdbc.update(ADD_FILM_GENRE, filmId, genreId);
         } catch (DuplicateKeyException e) {
-
+            return;
         } catch (DataIntegrityViolationException e) {
             throw new NotFoundException("Данные не найдены");
         }

@@ -34,7 +34,7 @@ public class FriendshipDbStorage extends BaseDbStorage<User> {
         try {
             jdbc.update(ADD_FRIEND, firstUserId, secondUserId);
         } catch (DuplicateKeyException e) {
-
+            return;
         } catch (DataIntegrityViolationException e) {
             throw new NotFoundException("Данные не найдены");
         }
