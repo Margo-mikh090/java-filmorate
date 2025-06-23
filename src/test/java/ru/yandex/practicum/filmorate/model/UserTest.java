@@ -59,7 +59,7 @@ public class UserTest {
 
     @Test
     void incorrectBDTest() {
-        User user1 = new User("margomargo123@gmail.com", "testlogin", null, LocalDate.of(2025, 5, 9));
+        User user1 = new User("margomargo123@gmail.com", "testlogin", null, LocalDate.of(2026, 4, 9));
         User user2 = new User("margomargo123@gmail.com", "testlogin", null, null);
         List<ConstraintViolation<User>> violations = new ArrayList<>();
         violations.addAll(validator.validate(user1));
