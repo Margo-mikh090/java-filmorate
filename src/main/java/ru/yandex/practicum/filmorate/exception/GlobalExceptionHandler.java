@@ -39,4 +39,11 @@ public class GlobalExceptionHandler {
         log.error("Internal server error: {} with message {}", e.getClass(), e.getMessage());
         return Map.of("error", "Internal Server Error");
     }
+
+    @ExceptionHandler(InternalServerException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public Map<String, String> handleRuntimeException(final InternalServerException e) {
+        log.error("Internal server exception: {} with message {}", e.getClass(), e.getMessage());
+        return Map.of("error", "Ошибка обновления данных");
+    }
 }

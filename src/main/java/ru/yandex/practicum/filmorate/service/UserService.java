@@ -1,30 +1,36 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.storage.friendship.FriendshipDbStorage;
+import ru.yandex.practicum.filmorate.storage.users.UserDbStorage;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class UserService {
-    private final UserStorage userStorage;
+    private final UserDbStorage userStorage;
+    private final FriendshipDbStorage friendshipDbStorage;
 
     public Collection<User> getAll() {
+        log.info("Запрос на получение списка пользователей");
         return userStorage.getAll();
     }
 
-    public User getById(int id) {
+    public User getById(long id) {
+        User user = userStorage.getById(id);
+        System.out.println(user);
         return userStorage.getById(id);
     }
 
-    public void deleteById(int id) {
+    public void deleteById(long id) {
         userStorage.deleteById(id);
     }
 
@@ -36,36 +42,30 @@ public class UserService {
         return userStorage.update(userToUpdate);
     }
 
-    public void addFriend(int fromId, int toId) {
+    public void addFriend(long fromId, long toId) {
         log.info("Запрос на добавление в друзья от пользователя с id {} пользователю с id {}", fromId, toId);
-        User fromUser = userStorage.getById(fromId);
-        User toUser = userStorage.getById(toId);
-        fromUser.addFriend(toId);
-        toUser.addFriend(fromId);
+        friendshipDbStorage.addFriend(fromId, toId);
         log.info("Успешное добавления в друзья пользователей с id {} и {}", fromId, toId);
     }
 
-    public void removeFriend(int fromId, int toId) {
+    public void removeFriend(long fromId, long toId) {
         log.info("Запрос на удаление друга от пользователя с id {} пользователю с id {}", fromId, toId);
-        User fromUser = userStorage.getById(fromId);
-        User toUser = userStorage.getById(toId);
-        fromUser.removeFriend(toId);
-        toUser.removeFriend(fromId);
+        friendshipDbStorage.removeFriend(fromId, toId);
         log.info("Успешное удаление друга пользователей с id {} и {}", fromId, toId);
     }
 
-    public Set<User> getMutualFriends(int fromId, int toId) {
+    public Set<User> getMutualFriends(long fromId, long toId) {
         log.info("Запрос на получение списка общих друзей пользователя с id {} пользователю с id {}", fromId, toId);
         Set<User> fromUserFriends = getUserFriends(fromId);
         Set<User> toUserFriends = getUserFriends(toId);
         return fromUserFriends.stream().filter(toUserFriends::contains).collect(Collectors.toSet());
     }
 
-    public Set<User> getUserFriends(int id) {
+    public Set<User> getUserFriends(long id) {
         log.info("Запрос на получение списка друзей пользователя с id {}", id);
-        User user = userStorage.getById(id);
-        return user.getFriends().stream()
-                .map(userStorage::getById)
-                .collect(Collectors.toSet());
+        Set<User> result = new HashSet<>(friendshipDbStorage.getUserFriends(id));
+        System.out.println(result);
+        log.info("Успешное получение списка друзей пользователя с id {}", id);
+        return result;
     }
 }

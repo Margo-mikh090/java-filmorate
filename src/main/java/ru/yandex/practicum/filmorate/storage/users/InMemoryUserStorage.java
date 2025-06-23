@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.storage.users;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -12,7 +12,7 @@ import java.util.Map;
 @Slf4j
 @Component
 public class InMemoryUserStorage implements UserStorage {
-    private final Map<Integer, User> users = new HashMap<>();
+    private final Map<Long, User> users = new HashMap<>();
 
     @Override
     public Collection<User> getAll() {
@@ -21,7 +21,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User getById(int id) {
+    public User getById(long id) {
         log.info("Запрос на получение пользователя с id {}", id);
         if (!users.containsKey(id)) {
             throw new NotFoundException("Пользователь с id " + id + " не найден");
@@ -30,7 +30,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public void deleteById(int id) {
+    public void deleteById(long id) {
         log.info("Запрос на удаление пользователя с id {}", id);
         if (!users.containsKey(id)) {
             throw new NotFoundException("Пользователь с id " + id + " не найден");
@@ -53,7 +53,7 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public User update(User userToUpdate) {
         log.info("Запрос на изменение пользователя с параметрами {}", userToUpdate);
-        Integer id = userToUpdate.getId();
+        Long id = userToUpdate.getId();
         if (!users.containsKey(id)) {
             throw new NotFoundException("Пользователь с id " + id + " не найден");
         }
@@ -70,10 +70,10 @@ public class InMemoryUserStorage implements UserStorage {
         return oldUser;
     }
 
-    private int getNextId() {
-        int currentMaxId = users.keySet()
+    private long getNextId() {
+        long currentMaxId = users.keySet()
                 .stream()
-                .mapToInt(id -> id)
+                .mapToLong(id -> id)
                 .max()
                 .orElse(0);
         return ++currentMaxId;

@@ -1,7 +1,7 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -14,7 +14,7 @@ import java.util.Set;
 
 @Slf4j
 @RestController
-@AllArgsConstructor
+@RequiredArgsConstructor
 @RequestMapping("/users")
 public class UserController {
     private final UserService userService;
@@ -25,12 +25,12 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public User getById(@PathVariable int id) {
+    public User getById(@PathVariable long id) {
         return userService.getById(id);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteById(@PathVariable int id) {
+    public void deleteById(@PathVariable long id) {
         userService.deleteById(id);
     }
 
@@ -47,22 +47,22 @@ public class UserController {
     }
 
     @PutMapping("/{id}/friends/{friendId}")
-    public void addFriend(@PathVariable int id, @PathVariable int friendId) {
+    public void addFriend(@PathVariable long id, @PathVariable long friendId) {
         userService.addFriend(id, friendId);
     }
 
     @DeleteMapping("/{id}/friends/{friendId}")
-    public void removeFriend(@PathVariable int id, @PathVariable int friendId) {
+    public void removeFriend(@PathVariable long id, @PathVariable long friendId) {
         userService.removeFriend(id, friendId);
     }
 
     @GetMapping("/{id}/friends")
-    public Set<User> getUserFriends(@PathVariable int id) {
+    public Set<User> getUserFriends(@PathVariable long id) {
         return userService.getUserFriends(id);
     }
 
     @GetMapping("/{id}/friends/common/{otherId}")
-    public Set<User> getMutualFriends(@PathVariable int id, @PathVariable int otherId) {
+    public Set<User> getMutualFriends(@PathVariable long id, @PathVariable long otherId) {
         return userService.getMutualFriends(id, otherId);
     }
 }

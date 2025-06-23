@@ -17,7 +17,7 @@ import java.util.Set;
 public class Film {
     @Null(groups = Marker.OnCreate.class)
     @NotNull(groups = Marker.OnUpdate.class)
-    private Integer id;
+    private Long id;
 
     @NotBlank(message = "Название не может быть пустым")
     private String name;
@@ -33,7 +33,11 @@ public class Film {
     @Positive(message = "Продолжительность фильма должна быть положительным числом")
     private Integer duration;
 
-    private final Set<Integer> userLikes = new HashSet<>();
+    private Set<Long> userLikes = new HashSet<>();
+
+    private Set<Genre> genres = new HashSet<>();
+
+    private MPA mpa;
 
     public Film(String name, String description, LocalDate releaseDate, Integer duration) {
         this.name = name;
@@ -42,11 +46,15 @@ public class Film {
         this.duration = duration;
     }
 
-    public void addLike(int id) {
+    public Film () {
+    }
+
+    public void addLike(long id) {
         userLikes.add(id);
     }
 
-    public void removeLike(int id) {
+    public void removeLike(long id) {
         userLikes.remove(id);
     }
+
 }
