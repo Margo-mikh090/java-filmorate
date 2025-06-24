@@ -10,17 +10,12 @@ import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.BaseDbStorage;
 import ru.yandex.practicum.filmorate.storage.genres.GenreDbStorage;
 import ru.yandex.practicum.filmorate.storage.mappers.FilmRowMapper;
-import ru.yandex.practicum.filmorate.storage.mpa.MPADbStorage;
-
 import java.util.Collection;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Repository
 @Primary
 public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
     private final GenreDbStorage genreDbStorage;
-    private final MPADbStorage mpaDbStorage;
 
     private static final String GET_ALL = "SELECT f.id, f.name, f.description, f.release_date, f.duration, " +
             "f.mpa_id, m.name AS mpa_name, ARRAY_AGG(DISTINCT g.genre_id) AS genres, ARRAY_AGG(DISTINCT l.user_id) AS likes " +
@@ -57,10 +52,9 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
             "ORDER BY COUNT(l.user_id) DESC " +
             "LIMIT ?";
 
-    public FilmDbStorage(JdbcTemplate jdbc, FilmRowMapper mapper, GenreDbStorage genreDbStorage, MPADbStorage mpaDbStorage) {
+    public FilmDbStorage(JdbcTemplate jdbc, FilmRowMapper mapper, GenreDbStorage genreDbStorage) {
         super(jdbc, mapper);
         this.genreDbStorage = genreDbStorage;
-        this.mpaDbStorage = mpaDbStorage;
     }
 
     @Override
@@ -88,18 +82,10 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
                     film.getDuration(),
                     film.getMpa().getId());
 
-            Set<Genre> genres = film.getGenres().stream()
-                    .map(Genre::getId)
-                    .peek(i -> genreDbStorage.addFilmGenre(id, i))
-                    .map(genreDbStorage::getById)
-                    .collect(Collectors.toSet());
-            film.setGenres(genres);
-
-            film.setMpa(mpaDbStorage.getById(film.getMpa().getId()));
-
-            film.setId(id);
-
-            return film;
+            for (Genre genre : film.getGenres()) {
+                genreDbStorage.addFilmGenre(id, genre.getId());
+            }
+            return getById(GET_BY_ID, id);
         } catch (DataIntegrityViolationException e) {
             throw new NotFoundException("Данные не найдены");
         }
@@ -114,15 +100,10 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
                 film.getMpa().getId(),
                 film.getId());
 
-        Set<Genre> genres = film.getGenres().stream()
-                .map(Genre::getId)
-                .peek(i -> genreDbStorage.addFilmGenre(film.getId(), i))
-                .map(genreDbStorage::getById)
-                .collect(Collectors.toSet());
-        film.setGenres(genres);
-
-        film.setMpa(mpaDbStorage.getById(film.getMpa().getId()));
-        return film;
+        for (Genre genre : film.getGenres()) {
+            genreDbStorage.addFilmGenre(film.getId(), genre.getId());
+        }
+        return getById(film.getId());
     }
 
     public Collection<Film> getRating(long count) {

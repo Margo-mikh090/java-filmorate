@@ -47,12 +47,4 @@ public class User {
 
     public User() {
     }
-
-    public void addFriend(long id) {
-        friends.add(id);
-    }
-
-    public void removeFriend(long id) {
-        friends.remove(id);
-    }
 }

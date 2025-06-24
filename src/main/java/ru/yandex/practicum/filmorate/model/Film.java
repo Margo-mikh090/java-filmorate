@@ -11,6 +11,7 @@ import ru.yandex.practicum.filmorate.serializer.LocalDateSerializer;
 
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 @Data
@@ -35,7 +36,7 @@ public class Film {
 
     private Set<Long> userLikes = new HashSet<>();
 
-    private Set<Genre> genres = new HashSet<>();
+    private Set<Genre> genres = new LinkedHashSet<>();
 
     private MPA mpa;
 
@@ -48,13 +49,4 @@ public class Film {
 
     public Film() {
     }
-
-    public void addLike(long id) {
-        userLikes.add(id);
-    }
-
-    public void removeLike(long id) {
-        userLikes.remove(id);
-    }
-
 }

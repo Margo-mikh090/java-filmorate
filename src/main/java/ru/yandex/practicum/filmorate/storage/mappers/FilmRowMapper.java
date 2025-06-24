@@ -11,10 +11,7 @@ import ru.yandex.practicum.filmorate.storage.genres.GenreDbStorage;
 import java.sql.Array;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -33,7 +30,7 @@ public class FilmRowMapper implements RowMapper<Film> {
         film.setMpa(new MPA(rs.getLong("mpa_id"), rs.getString("mpa_name")));
         film.setUserLikes(getLongSet(rs.getArray("likes")));
         Set<Long> genresId = getLongSet(rs.getArray("genres"));
-        Set<Genre> genres = genresId.stream().map(genreDbStorage::getById).collect(Collectors.toSet());
+        Set<Genre> genres = genresId.stream().map(genreDbStorage::getById).collect(Collectors.toCollection(LinkedHashSet::new));
         film.setGenres(genres);
 
         return film;

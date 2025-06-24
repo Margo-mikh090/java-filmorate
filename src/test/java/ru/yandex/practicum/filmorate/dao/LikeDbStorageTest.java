@@ -18,9 +18,7 @@ import ru.yandex.practicum.filmorate.storage.genres.GenreDbStorage;
 import ru.yandex.practicum.filmorate.storage.likes.LikeDbStorage;
 import ru.yandex.practicum.filmorate.storage.mappers.FilmRowMapper;
 import ru.yandex.practicum.filmorate.storage.mappers.GenreRowMapper;
-import ru.yandex.practicum.filmorate.storage.mappers.MPARowMapper;
 import ru.yandex.practicum.filmorate.storage.mappers.UserRowMapper;
-import ru.yandex.practicum.filmorate.storage.mpa.MPADbStorage;
 import ru.yandex.practicum.filmorate.storage.users.UserDbStorage;
 
 import java.time.LocalDate;
@@ -34,8 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @JdbcTest
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-@Import({LikeDbStorage.class, FilmDbStorage.class, FilmRowMapper.class, GenreDbStorage.class, GenreRowMapper.class,
-        MPADbStorage.class, MPARowMapper.class, UserDbStorage.class, UserRowMapper.class})
+@Import({LikeDbStorage.class, FilmDbStorage.class, FilmRowMapper.class, GenreDbStorage.class, GenreRowMapper.class, UserDbStorage.class, UserRowMapper.class})
 public class LikeDbStorageTest {
     private final LikeDbStorage likeDbStorage;
     private final UserDbStorage userDbStorage;

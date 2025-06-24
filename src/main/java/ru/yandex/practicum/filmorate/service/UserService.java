@@ -21,7 +21,9 @@ public class UserService {
 
     public Collection<User> getAll() {
         log.info("Запрос на получение списка пользователей");
-        return userStorage.getAll();
+        Collection<User> users = userStorage.getAll();
+        log.info("Успешное получение списка пользователей");
+        return users;
     }
 
     public User getById(long id) {
