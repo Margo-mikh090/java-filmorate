@@ -30,17 +30,14 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 public class FilmDbStorageTest {
     private final FilmDbStorage filmDbStorage;
     private final JdbcTemplate jdbc;
-    private Film film1 = new Film();
-    private Film film2 = new Film();
+    private Film film1;
+    private Film film2;
 
     @BeforeEach
     public void beforeEach() {
         jdbc.update("DELETE FROM films");
 
-        film1.setName("name 1");
-        film1.setDescription("description 1");
-        film1.setDuration(190);
-        film1.setReleaseDate(LocalDate.now());
+        film1 = new Film("name 1", "description 1", LocalDate.now(), 190);
         film1.setMpa(new MPA(3L, null));
         Set<Genre> genres = new HashSet<>();
         genres.add(new Genre(1L, null));
@@ -48,10 +45,7 @@ public class FilmDbStorageTest {
         film1.setGenres(genres);
         film1 = filmDbStorage.create(film1);
 
-        film2.setName("name 2");
-        film2.setDescription("description 2");
-        film2.setDuration(190);
-        film2.setReleaseDate(LocalDate.now());
+        film2 = new Film("name 2", "description 2", LocalDate.now(), 190);
         film2.setMpa(new MPA(3L, null));
         film2.setGenres(genres);
 

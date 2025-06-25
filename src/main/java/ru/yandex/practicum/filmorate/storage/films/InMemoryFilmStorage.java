@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -67,6 +68,11 @@ public class InMemoryFilmStorage implements FilmStorage {
         }
         log.info("Фильм успешно обновлен с параметрами {}", oldFilm);
         return oldFilm;
+    }
+
+    @Override
+    public Collection<Film> getRating(long count) {
+        return List.of();
     }
 
     private long getNextId() {

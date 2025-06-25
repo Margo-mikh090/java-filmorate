@@ -24,23 +24,17 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 public class UserDbStorageTest {
     private final UserDbStorage userDbStorage;
     private final JdbcTemplate jdbc;
-    private User user1 = new User();
-    private User user2 = new User();
+    private User user1;
+    private User user2;
 
     @BeforeEach
     public void beforeEach() {
         jdbc.update("DELETE FROM users");
 
-        user1.setName("name 1");
-        user1.setBirthday(LocalDate.now());
-        user1.setLogin("login1");
-        user1.setEmail("email@1gmail.com");
+        user1 = new User("email@1gmail.com", "login1", "name 1", LocalDate.now());
         user1 = userDbStorage.create(user1);
 
-        user2.setName("name 2");
-        user2.setBirthday(LocalDate.now());
-        user2.setLogin("login2");
-        user2.setEmail("email@2gmail.com");
+        user2 = new User("email@2gmail.com", "login2", "name 2", LocalDate.now());
         user2 = userDbStorage.create(user2);
     }
 

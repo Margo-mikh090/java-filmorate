@@ -38,23 +38,17 @@ public class LikeDbStorageTest {
     private final UserDbStorage userDbStorage;
     private final FilmDbStorage filmDbStorage;
     private final JdbcTemplate jdbc;
-    private User user = new User();
-    private Film film = new Film();
+    private User user;
+    private Film film;
 
     @BeforeEach
     public void beforeEach() {
         jdbc.update("DELETE FROM likes");
 
-        user.setName("name");
-        user.setBirthday(LocalDate.now());
-        user.setLogin("login");
-        user.setEmail("email@gmail.com");
+        user = new User("email@gmail.com", "login", "name", LocalDate.now());
         user = userDbStorage.create(user);
 
-        film.setName("name");
-        film.setDescription("description");
-        film.setDuration(190);
-        film.setReleaseDate(LocalDate.now());
+        film = new Film("name", "description", LocalDate.now(), 190);
         film.setMpa(new MPA(3L, null));
         Set<Genre> genres = new HashSet<>();
         genres.add(new Genre(1L, null));
@@ -84,18 +78,10 @@ public class LikeDbStorageTest {
 
     @Test
     public void testGetRating() {
-        User userRate = new User();
-        userRate.setName("name");
-        userRate.setBirthday(LocalDate.now());
-        userRate.setEmail("email@gmail.ru");
-        userRate.setLogin("newlogin");
+        User userRate = new User("email@gmail.ru", "newlogin", "name", LocalDate.now());
         userRate = userDbStorage.create(userRate);
 
-        Film filmRate = new Film();
-        filmRate.setName("name");
-        filmRate.setDescription("description");
-        filmRate.setDuration(190);
-        filmRate.setReleaseDate(LocalDate.now());
+        Film filmRate = new Film("name", "description", LocalDate.now(), 190);
         filmRate.setMpa(new MPA(3L, null));
         Set<Genre> genres = new HashSet<>();
         genres.add(new Genre(1L, null));

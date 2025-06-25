@@ -12,7 +12,4 @@ public class MPA {
     private Long id;
     @NotBlank
     private String name;
-
-    public MPA() {
-    }
 }

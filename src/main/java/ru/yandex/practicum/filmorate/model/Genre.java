@@ -12,7 +12,4 @@ public class Genre {
     private Long id;
     @NotBlank
     private String name;
-
-    public Genre() {
-    }
 }

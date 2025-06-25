@@ -14,4 +14,6 @@ public interface FilmStorage {
     Film create(Film film);
 
     Film update(Film film);
+
+    Collection<Film> getRating(long count);
 }

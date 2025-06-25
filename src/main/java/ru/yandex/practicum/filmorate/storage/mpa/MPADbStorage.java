@@ -9,7 +9,7 @@ import ru.yandex.practicum.filmorate.storage.mappers.MPARowMapper;
 import java.util.Collection;
 
 @Repository
-public class MPADbStorage extends BaseDbStorage<MPA> {
+public class MPADbStorage extends BaseDbStorage<MPA> implements MPAStorage {
     private static final String GET_BY_ID = "SELECT * FROM mpa WHERE id = ?";
     private static final String GET_ALL = "SELECT * FROM mpa";
 
@@ -17,10 +17,12 @@ public class MPADbStorage extends BaseDbStorage<MPA> {
         super(jdbc, mapper);
     }
 
+    @Override
     public Collection<MPA> getAll() {
         return getAll(GET_ALL);
     }
 
+    @Override
     public MPA getById(long id) {
         return getById(GET_BY_ID, id);
     }

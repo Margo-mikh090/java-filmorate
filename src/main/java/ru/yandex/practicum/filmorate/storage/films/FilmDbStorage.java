@@ -8,14 +8,14 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.BaseDbStorage;
-import ru.yandex.practicum.filmorate.storage.genres.GenreDbStorage;
+import ru.yandex.practicum.filmorate.storage.genres.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.mappers.FilmRowMapper;
 import java.util.Collection;
 
 @Repository
 @Primary
 public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
-    private final GenreDbStorage genreDbStorage;
+    private final GenreStorage genreDbStorage;
 
     private static final String GET_ALL = "SELECT f.id, f.name, f.description, f.release_date, f.duration, " +
             "f.mpa_id, m.name AS mpa_name, ARRAY_AGG(DISTINCT g.genre_id) AS genres, ARRAY_AGG(DISTINCT l.user_id) AS likes " +
@@ -52,7 +52,7 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
             "ORDER BY COUNT(l.user_id) DESC " +
             "LIMIT ?";
 
-    public FilmDbStorage(JdbcTemplate jdbc, FilmRowMapper mapper, GenreDbStorage genreDbStorage) {
+    public FilmDbStorage(JdbcTemplate jdbc, FilmRowMapper mapper, GenreStorage genreDbStorage) {
         super(jdbc, mapper);
         this.genreDbStorage = genreDbStorage;
     }
@@ -106,6 +106,7 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
         return getById(film.getId());
     }
 
+    @Override
     public Collection<Film> getRating(long count) {
         return jdbc.query(GET_RATING, mapper, count);
     }

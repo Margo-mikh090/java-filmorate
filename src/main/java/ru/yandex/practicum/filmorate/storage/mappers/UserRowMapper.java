@@ -14,12 +14,9 @@ import java.util.stream.Collectors;
 public class UserRowMapper implements RowMapper<User> {
     @Override
     public User mapRow(ResultSet rs, int rowNum) throws SQLException {
-        User user = new User();
+        User user = new User(rs.getString("email"), rs.getString("login"),
+                rs.getString("name"), rs.getDate("birthday").toLocalDate());
         user.setId(rs.getLong("id"));
-        user.setEmail(rs.getString("email"));
-        user.setLogin(rs.getString("login"));
-        user.setName(rs.getString("name"));
-        user.setBirthday(rs.getDate("birthday").toLocalDate());
         user.setFriends(getLongSet(rs.getArray("friends_id")));
 
         return user;
