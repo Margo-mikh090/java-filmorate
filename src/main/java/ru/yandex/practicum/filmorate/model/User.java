@@ -17,7 +17,7 @@ import java.util.Set;
 public class User {
     @Null(groups = Marker.OnCreate.class)
     @NotNull(groups = Marker.OnUpdate.class)
-    private Integer id;
+    private Long id;
 
     @Email(message = "Электронная почта должна соответствовать своему формату")
     @NotBlank(message = "Электронная почта не может быть пустой")
@@ -36,20 +36,12 @@ public class User {
 
     public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-    private final Set<Integer> friends = new HashSet<>();
+    private Set<Long> friends = new HashSet<>();
 
     public User(String email, String login, String name, LocalDate birthday) {
         this.email = email;
         this.login = login;
         this.name = name;
         this.birthday = birthday;
-    }
-
-    public void addFriend(int id) {
-        friends.add(id);
-    }
-
-    public void removeFriend(int id) {
-        friends.remove(id);
     }
 }

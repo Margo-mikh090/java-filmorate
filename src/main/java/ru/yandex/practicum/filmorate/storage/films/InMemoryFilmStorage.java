@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.storage.films;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -7,12 +7,13 @@ import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
 @Component
 public class InMemoryFilmStorage implements FilmStorage {
-    private final Map<Integer, Film> films = new HashMap<>();
+    private final Map<Long, Film> films = new HashMap<>();
 
     @Override
     public Collection<Film> getAll() {
@@ -21,7 +22,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Film getById(int id) {
+    public Film getById(long id) {
         log.info("Запрос на получение фильма с id {}", id);
         if (!films.containsKey(id)) {
             throw new NotFoundException("Фильм с id " + id + " не найден");
@@ -30,7 +31,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public void deleteById(int id) {
+    public void deleteById(long id) {
         log.info("Запрос на удаление фильма с id {}", id);
         if (!films.containsKey(id)) {
             throw new NotFoundException("Фильм с id " + id + " не найден");
@@ -50,7 +51,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public Film update(Film filmToUpdate) {
         log.info("Запрос на изменение фильма с параметрами {}", filmToUpdate);
-        Integer id = filmToUpdate.getId();
+        Long id = filmToUpdate.getId();
         if (!films.containsKey(id)) {
             throw new NotFoundException("Фильм с id " + id + " не найден");
         }
@@ -69,10 +70,15 @@ public class InMemoryFilmStorage implements FilmStorage {
         return oldFilm;
     }
 
-    private int getNextId() {
-        int currentMaxId = films.keySet()
+    @Override
+    public Collection<Film> getRating(long count) {
+        return List.of();
+    }
+
+    private long getNextId() {
+        long currentMaxId = films.keySet()
                 .stream()
-                .mapToInt(id -> id)
+                .mapToLong(id -> id)
                 .max()
                 .orElse(0);
         return ++currentMaxId;

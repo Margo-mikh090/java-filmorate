@@ -1,64 +1,60 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.storage.films.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.likes.LikeStorage;
 
 import java.util.Collection;
 import java.util.List;
 
 @Slf4j
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class FilmService {
     private final FilmStorage filmStorage;
-    private final UserStorage userStorage;
+    private final LikeStorage likeDbStorage;
+
 
     public Collection<Film> getAll() {
+        log.info("Запрос на получение списка фильмов");
         return filmStorage.getAll();
     }
 
-    public Film getById(int id) {
+    public Film getById(long id) {
+        log.info("Запрос на получение фильма с id {}", id);
         return filmStorage.getById(id);
     }
 
-    public void deleteById(int id) {
+    public void deleteById(long id) {
+        log.info("Запрос на удаление фильма с id {}", id);
         filmStorage.deleteById(id);
     }
 
     public Film create(Film film) {
+        log.info("Запрос на создание фильма с данными: {}", film);
         return filmStorage.create(film);
     }
 
     public Film update(Film filmToUpdate) {
+        log.info("Запрос на обновление фильма с данными: {}", filmToUpdate);
         return filmStorage.update(filmToUpdate);
     }
 
-    public void addLike(int filmId, int userId) {
+    public void addLike(long filmId, long userId) {
         log.info("Запрос на добавление лайка к фильму с id {}", filmId);
-        Film film = filmStorage.getById(filmId);
-        User user = userStorage.getById(userId);
-        film.addLike(user.getId());
-        log.info("Лайк успешно добавлен у фильма с id {}", filmId);
+        likeDbStorage.addLike(userId, filmId);
     }
 
-    public void removeLike(int filmId, int userId) {
+    public void removeLike(long filmId, long userId) {
         log.info("Запрос на удаление лайка к фильму с id {}", filmId);
-        Film film = filmStorage.getById(filmId);
-        User user = userStorage.getById(userId);
-        film.removeLike(user.getId());
-        log.info("Лайк успешно удален у фильма с id {}", filmId);
+        likeDbStorage.removeLike(userId, filmId);
     }
 
     public List<Film> getRating(Integer count) {
         log.info("Запрос на получение списка {} фильмов по количеству лайков", count);
-        return filmStorage.getAll().stream()
-                .sorted((film1, film2) -> film2.getUserLikes().size() - film1.getUserLikes().size())
-                .limit(count)
-                .toList();
+        return filmStorage.getRating(count).stream().toList();
     }
 }
