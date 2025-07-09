@@ -26,6 +26,7 @@ import ru.yandex.practicum.filmorate.storage.users.UserDbStorage;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
@@ -102,5 +103,12 @@ public class LikeDbStorageTest {
         assertThat(filmsRate.size()).isEqualTo(2);
 
         assertThat(filmsRate.getFirst().getId()).isEqualTo(film.getId());
+    }
+
+    @Test
+    public void testGetAllUserLikes() {
+        Map<Long, Set<Long>> expectedValue = Map.of(user.getId(), Set.of(film.getId()));
+        likeDbStorage.addLike(user.getId(), film.getId());
+        assertThat(likeDbStorage.getAllUserLikes()).isEqualTo(expectedValue);
     }
 }
