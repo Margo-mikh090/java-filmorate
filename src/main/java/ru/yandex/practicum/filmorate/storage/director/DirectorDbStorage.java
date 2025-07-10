@@ -96,7 +96,7 @@ public class DirectorDbStorage extends BaseDbStorage<Director> implements Direct
     @Override
     public Set<Director> getByFilmId(long filmId) {
         return new HashSet<>(findMany(QUERY_DIRECTOR_BY_FILM_ID, filmId));
-    };
+    }
 
     @Override
     public Map<Long, Set<Director>> findAllIndexByFilmId() {
@@ -116,5 +116,5 @@ public class DirectorDbStorage extends BaseDbStorage<Director> implements Direct
             return null;
         });
         return directorByFilmId;
-    };
+    }
 }
