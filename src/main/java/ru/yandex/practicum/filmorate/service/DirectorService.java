@@ -19,7 +19,7 @@ public class DirectorService {
         return directorStorage.getAll();
     }
 
-    public Director getById(long id) {
+    public Director getById (long id) {
         log.info("Получение режиссера по id={}", id);
         return directorStorage.getById(id);
     }
