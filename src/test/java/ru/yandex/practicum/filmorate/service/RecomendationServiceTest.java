@@ -27,12 +27,12 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Import({LikeDbStorage.class, FilmDbStorage.class, FilmRowMapper.class, GenreDbStorage.class, GenreRowMapper.class,
-        UserDbStorage.class, UserRowMapper.class, RecomendationService.class})
+        UserDbStorage.class, UserRowMapper.class, RecommendationService.class})
 public class RecomendationServiceTest {
     private final LikeDbStorage likeDbStorage;
     private final UserDbStorage userDbStorage;
     private final FilmDbStorage filmDbStorage;
-    private final RecomendationService recomendationService;
+    private final RecommendationService recomendationService;
 
     @BeforeEach
     public void beforeEach() {
