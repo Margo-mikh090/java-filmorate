@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.exception;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -29,7 +30,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ConditionsNotMetException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Map<String, String> handleConditionsNotMetException(final ConditionsNotMetException e) {
-        log.warn("ConditionsNotMetException: {}", e.getMessage());
+        if (e.getMessage().contains("отзыв") || e.getMessage().contains("лайк")) {
+            log.warn("ConditionsNotMetException (Review): {}", e.getMessage());  // Лог для отзывов
+        } else {
+            log.warn("ConditionsNotMetException: {}", e.getMessage());  // Общий лог
+        }
         return Map.of("error", e.getMessage());
     }
 
@@ -45,5 +50,17 @@ public class GlobalExceptionHandler {
     public Map<String, String> handleRuntimeException(final InternalServerException e) {
         log.error("Internal server exception: {} with message {}", e.getClass(), e.getMessage());
         return Map.of("error", "Ошибка обновления данных");
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String, String> handleDataIntegrityViolation(final DataIntegrityViolationException e) {
+        String rootCause = e.getRootCause() != null ? e.getRootCause().getMessage() : e.getMessage();
+        if (rootCause.contains("reviews") || rootCause.contains("review_likes")) {
+            log.warn("DataIntegrityViolationException (Review): {}", rootCause);  // Лог для отзывов
+        } else {
+            log.warn("DataIntegrityViolationException: {}", rootCause);  // Общий лог
+        }
+        return Map.of("error", "Ошибка целостности данных: " + rootCause);
     }
 }
