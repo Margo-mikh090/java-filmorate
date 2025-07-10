@@ -4,21 +4,28 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.films.FilmDbStorage;
-import ru.yandex.practicum.filmorate.storage.likes.LikeDbStorage;
+import ru.yandex.practicum.filmorate.storage.films.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.likes.LikeStorage;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class RecomendationService {
-    private final LikeDbStorage likeDbStorage;
-    private final FilmDbStorage filmDbStorage;
+public class RecommendationService {
+    private final LikeStorage likeStorage;
+    private final FilmStorage filmStorage;
 
     public List<Film> getRecommendations(long userId) {
         log.info("Запрос на получение списка рекомендованных фильмов для пользователя с id {}", userId);
-        Map<Long, Set<Long>> allUserLikes = likeDbStorage.getAllUserLikes(); // выгрузка таблицы likes в нужном формате
+        Map<Long, Set<Long>> allUserLikes = likeStorage.getAllUserLikes(); // выгрузка таблицы likes в нужном формате
 
         Set<Long> userLikes = allUserLikes.getOrDefault(userId, Collections.emptySet()); // проверка на наличие интересующего пользователя и его лайков
         if (userLikes.isEmpty()) {
@@ -32,7 +39,7 @@ public class RecomendationService {
         }
 
         List<Long> recommendedFilms = getRecommendedFilms(allUserLikes, userLikes, mostSimilarUser.get());
-        return recommendedFilms.stream().map(filmDbStorage::getById).toList();
+        return recommendedFilms.stream().map(filmStorage::getById).toList();
     }
 
     private Map<Long, Long> countCommonLikes(Map<Long, Set<Long>> allUserLikes, long userId, Set<Long> userLikes) {

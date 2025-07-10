@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.annotation.Marker;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.RecomendationService;
+import ru.yandex.practicum.filmorate.service.RecommendationService;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.util.Collection;
@@ -19,7 +19,7 @@ import java.util.Set;
 @RequestMapping("/users")
 public class UserController {
     private final UserService userService;
-    private final RecomendationService recomendationService;
+    private final RecommendationService recommendationService;
 
     @GetMapping
     public Collection<User> getAll() {
@@ -68,8 +68,8 @@ public class UserController {
         return userService.getMutualFriends(id, otherId);
     }
 
-    @GetMapping("{id}/recommendations")
+    @GetMapping("/{id}/recommendations")
     public List<Film> getRecommendations(@PathVariable long id) {
-        return recomendationService.getRecommendations(id);
+        return recommendationService.getRecommendations(id);
     }
 }
