@@ -17,7 +17,6 @@ public class FilmService {
     private final FilmStorage filmStorage;
     private final LikeStorage likeDbStorage;
 
-
     public Collection<Film> getAll() {
         log.info("Запрос на получение списка фильмов");
         return filmStorage.getAll();
@@ -56,5 +55,10 @@ public class FilmService {
     public List<Film> getRating(Integer count) {
         log.info("Запрос на получение списка {} фильмов по количеству лайков", count);
         return filmStorage.getRating(count).stream().toList();
+    }
+
+    public List<Film> getDirectorFilm(long directorId, String sortBy) {
+        log.info("Запрос на получение списка фильмов для директора id={} с сортировкой={}", directorId, sortBy);
+        return filmStorage.getDirectorFilm(directorId, sortBy).stream().toList();
     }
 }

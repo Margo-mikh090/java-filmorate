@@ -83,4 +83,9 @@ public class InMemoryFilmStorage implements FilmStorage {
                 .orElse(0);
         return ++currentMaxId;
     }
+
+    @Override
+    public Collection<Film> getDirectorFilm(long directorId, String sortBy) {
+        return List.of();
+    }
 }
