@@ -56,7 +56,7 @@ public class FilmController {
     }
 
     @GetMapping("/popular")
-    public List<Film> getRating(@RequestParam(defaultValue = "10") int count) {
+    public List<Film> getRating(@RequestParam(defaultValue = "10") long count) {
         if (count <= 0) {
             throw new ConditionsNotMetException("Кол-во фильмов должно быть положительным числом, введенное значение - "
                     + count);
@@ -68,5 +68,10 @@ public class FilmController {
     public List<Film> getDirectorFilm(@PathVariable long directorId,
                                       @RequestParam(required = false) String sortBy) {
         return filmService.getDirectorFilm(directorId, sortBy);
+    }
+
+    @GetMapping("/common")
+    public List<Film> getCommonFilms(@RequestParam long userId, @RequestParam long friendId) {
+        return filmService.getCommonFilms(userId, friendId);
     }
 }
