@@ -5,8 +5,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.annotation.Marker;
+import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.EventService;
 import ru.yandex.practicum.filmorate.service.RecommendationService;
 import ru.yandex.practicum.filmorate.service.UserService;
 
@@ -20,6 +22,7 @@ import java.util.Set;
 public class UserController {
     private final UserService userService;
     private final RecommendationService recommendationService;
+    private final EventService eventService;
 
     @GetMapping
     public Collection<User> getAll() {
@@ -71,5 +74,10 @@ public class UserController {
     @GetMapping("/{id}/recommendations")
     public List<Film> getRecommendations(@PathVariable long id) {
         return recommendationService.getRecommendations(id);
+    }
+
+    @GetMapping("/{id}/feed")
+    public List<Event> getUserFeed(@PathVariable long id) {
+        return eventService.getUserFeed(id);
     }
 }
