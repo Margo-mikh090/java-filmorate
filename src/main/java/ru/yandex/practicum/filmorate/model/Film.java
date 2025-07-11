@@ -40,6 +40,8 @@ public class Film {
 
     private MPA mpa;
 
+    private Set<Director> directors = new HashSet<>();
+
     public Film(String name, String description, LocalDate releaseDate, Integer duration) {
         this.name = name;
         this.description = description;
