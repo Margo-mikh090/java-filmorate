@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.ConditionsNotMetException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.films.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.likes.LikeStorage;
@@ -53,8 +54,19 @@ public class FilmService {
         likeDbStorage.removeLike(userId, filmId);
     }
 
-    public List<Film> getRating(Integer count) {
-        log.info("Запрос на получение списка {} фильмов по количеству лайков", count);
-        return filmStorage.getRating(count).stream().toList();
+    public List<Film> getRating(Integer count, Integer genreId, Integer year) {
+        log.info("Запрос на топ фильмов (count: {}, жанр: {}, год: {})", count, genreId, year);
+
+        if (count <= 0) {
+            throw new ConditionsNotMetException(
+                    "Кол-во фильмов должно быть положительным числом, введенное значение - " + count
+            );
+        }
+
+        if (genreId != null || year != null) {
+            return filmStorage.getRating(Integer.MAX_VALUE, genreId, year).stream().toList();
+        }
+
+        return filmStorage.getRating(count, null, null).stream().toList();
     }
 }
