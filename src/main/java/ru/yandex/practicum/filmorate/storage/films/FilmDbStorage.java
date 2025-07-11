@@ -95,25 +95,25 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
 
     private static final String FILM_DIRECTOR =
             """
-            SELECT f.id, f.name, f.description, f.release_date, f.duration,
-                   f.mpa_id, m.name AS mpa_name, ARRAY_AGG(DISTINCT g.genre_id) AS genres, ARRAY_AGG(DISTINCT l.user_id) AS likes
-              FROM films f
-                   JOIN film_director fd
-                     ON fd.film_id = f.id
-                   LEFT JOIN (SELECT l.film_id,
-                                     count(*) likes_count
-                                FROM likes l
-                               GROUP BY l.film_id) fl_count
-                          ON fl_count.film_id = f.id
-                   LEFT JOIN film_genres AS g ON f.id = g.film_id
-                   LEFT JOIN likes AS l ON f.id = l.film_id
-                   LEFT JOIN mpa AS m ON f.mpa_id = m.id
-             WHERE fd.director_id = ?
-             GROUP BY f.id
-             ORDER BY DECODE(lower(?), 'year', EXTRACT(YEAR FROM f.release_date)) NULLS LAST,
-                      DECODE(lower(?), 'likes', fl_count.likes_count) DESC NULLS LAST,
-                      f.id
-            """;
+                    SELECT f.id, f.name, f.description, f.release_date, f.duration,
+                           f.mpa_id, m.name AS mpa_name, ARRAY_AGG(DISTINCT g.genre_id) AS genres, ARRAY_AGG(DISTINCT l.user_id) AS likes
+                      FROM films f
+                           JOIN film_director fd
+                             ON fd.film_id = f.id
+                           LEFT JOIN (SELECT l.film_id,
+                                             count(*) likes_count
+                                        FROM likes l
+                                       GROUP BY l.film_id) fl_count
+                                  ON fl_count.film_id = f.id
+                           LEFT JOIN film_genres AS g ON f.id = g.film_id
+                           LEFT JOIN likes AS l ON f.id = l.film_id
+                           LEFT JOIN mpa AS m ON f.mpa_id = m.id
+                     WHERE fd.director_id = ?
+                     GROUP BY f.id
+                     ORDER BY DECODE(lower(?), 'year', EXTRACT(YEAR FROM f.release_date)) NULLS LAST,
+                              DECODE(lower(?), 'likes', fl_count.likes_count) DESC NULLS LAST,
+                              f.id
+                    """;
 
     public FilmDbStorage(JdbcTemplate jdbc, FilmRowMapper mapper, GenreStorage genreDbStorage, DirectorStorage directorStorage) {
         super(jdbc, mapper);
@@ -181,24 +181,24 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
         return getById(film.getId());
     }
 
-   @Override
-public Collection<Film> getRating(long count, Integer genreId, Integer year) {
-    final Collection<Film> films;
-    
-    if (genreId != null && year != null) {
-        films = jdbc.query(GET_RATING_BY_GENRE_AND_YEAR, mapper, genreId, year, count);
-    } else if (genreId != null) {
-        films = jdbc.query(GET_RATING_BY_GENRE, mapper, genreId, count);
-    } else if (year != null) {
-        films = jdbc.query(GET_RATING_BY_YEAR, mapper, year, count);
-    } else {
-        films = jdbc.query(GET_RATING, mapper, count);  // Этот случай обрабатывает ситуацию, когда оба параметра null
+    @Override
+    public Collection<Film> getRating(long count, Integer genreId, Integer year) {
+        final Collection<Film> films;
+
+        if (genreId != null && year != null) {
+            films = jdbc.query(GET_RATING_BY_GENRE_AND_YEAR, mapper, genreId, year, count);
+        } else if (genreId != null) {
+            films = jdbc.query(GET_RATING_BY_GENRE, mapper, genreId, count);
+        } else if (year != null) {
+            films = jdbc.query(GET_RATING_BY_YEAR, mapper, year, count);
+        } else {
+            films = jdbc.query(GET_RATING, mapper, count);  // Этот случай обрабатывает ситуацию, когда оба параметра null
+        }
+
+        final Map<Long, Set<Director>> directorIndexByFilm = directorStorage.findAllIndexByFilmId();
+        films.forEach(f -> f.setDirectors(directorIndexByFilm.getOrDefault(f.getId(), new HashSet<>())));
+        return films;
     }
-    
-    final Map<Long, Set<Director>> directorIndexByFilm = directorStorage.findAllIndexByFilmId();
-    films.forEach(f -> f.setDirectors(directorIndexByFilm.getOrDefault(f.getId(), new HashSet<>())));
-    return films;
-}
 
     @Override
     public Collection<Film> getDirectorFilm(long directorId, String sortBy) {
