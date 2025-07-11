@@ -14,13 +14,13 @@ public class EventRowMapper implements RowMapper<Event> {
 
     @Override
     public Event mapRow(ResultSet rs, int rowNum) throws SQLException {
-        return new Event(
-                rs.getLong("event_id"),
-                rs.getLong("user_id"),
-                rs.getLong("entity_id"),
-                EventType.valueOf(rs.getString("event_type")),
-                Operation.valueOf(rs.getString("operation")),
-                rs.getTimestamp("created_at").toInstant()
-        );
+        return Event.builder()
+                .eventId(rs.getLong("event_id"))
+                .userId(rs.getLong("user_id"))
+                .entityId(rs.getLong("entity_id"))
+                .eventType(EventType.valueOf(rs.getString("event_type")))
+                .operation(Operation.valueOf(rs.getString("operation")))
+                .timestamp(rs.getTimestamp("created_at").toInstant())
+                .build();
     }
 }

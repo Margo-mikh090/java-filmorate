@@ -16,8 +16,8 @@ public class EventService {
     private final EventStorage eventStorage;
 
     public void addEvent(Event event) {
-        log.info("Добавление события с id {} в ленту событий", event.getEventId());
-
+        log.info("Добавление события пользователя с id {} в ленту событий", event.getUserId());
+        eventStorage.addEvent(event);
     }
 
     public List<Event> getUserFeed(Long id) {

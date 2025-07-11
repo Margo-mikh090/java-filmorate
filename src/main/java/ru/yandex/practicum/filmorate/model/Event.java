@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.model;
 
-import jakarta.validation.constraints.NotNull;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Builder;
 import lombok.Data;
 import ru.yandex.practicum.filmorate.model.enums.EventType;
 import ru.yandex.practicum.filmorate.model.enums.Operation;
@@ -8,25 +9,13 @@ import ru.yandex.practicum.filmorate.model.enums.Operation;
 import java.time.Instant;
 
 @Data
+@Builder
 public class Event {
-    @NotNull
     private Long eventId;
-    @NotNull
     private Long userId;
-    @NotNull
     private Long entityId;
     private EventType eventType;
     private Operation operation;
-    @NotNull
+    @JsonFormat(shape = JsonFormat.Shape.NUMBER_INT)
     private Instant timestamp;
-
-
-    public Event(Long eventId, Long userId, Long entityId, EventType eventType, Operation operation, Instant timestamp) {
-        this.eventId = eventId;
-        this.userId = userId;
-        this.entityId = entityId;
-        this.eventType = eventType;
-        this.operation = operation;
-        this.timestamp = timestamp;
-    }
 }

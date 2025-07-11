@@ -3,7 +3,10 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.enums.EventType;
+import ru.yandex.practicum.filmorate.model.enums.Operation;
 import ru.yandex.practicum.filmorate.storage.films.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.likes.LikeStorage;
 
@@ -16,6 +19,7 @@ import java.util.List;
 public class FilmService {
     private final FilmStorage filmStorage;
     private final LikeStorage likeDbStorage;
+    private final EventService eventService;
 
     public Collection<Film> getAll() {
         log.info("Запрос на получение списка фильмов");
@@ -45,11 +49,23 @@ public class FilmService {
     public void addLike(long filmId, long userId) {
         log.info("Запрос на добавление лайка к фильму с id {}", filmId);
         likeDbStorage.addLike(userId, filmId);
+        eventService.addEvent(Event.builder()
+                .userId(userId)
+                .entityId(filmId)
+                .eventType(EventType.LIKE)
+                .operation(Operation.ADD)
+                .build());
     }
 
     public void removeLike(long filmId, long userId) {
         log.info("Запрос на удаление лайка к фильму с id {}", filmId);
         likeDbStorage.removeLike(userId, filmId);
+        eventService.addEvent(Event.builder()
+                .userId(userId)
+                .entityId(filmId)
+                .eventType(EventType.LIKE)
+                .operation(Operation.REMOVE)
+                .build());
     }
 
     public List<Film> getRating(Integer count) {
