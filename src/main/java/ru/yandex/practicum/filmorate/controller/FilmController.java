@@ -63,4 +63,10 @@ public class FilmController {
         }
         return filmService.getRating(count);
     }
+
+    @GetMapping("/director/{directorId}")
+    public List<Film> getDirectorFilm(@PathVariable long directorId,
+                                      @RequestParam(required = false) String sortBy) {
+        return filmService.getDirectorFilm(directorId, sortBy);
+    }
 }

@@ -61,4 +61,8 @@ public class BaseDbStorage<T> {
         }
         return id;
     }
+
+    protected List<T> findMany(String query, Object... params) {
+        return jdbc.query(query, mapper, params);
+    }
 }
