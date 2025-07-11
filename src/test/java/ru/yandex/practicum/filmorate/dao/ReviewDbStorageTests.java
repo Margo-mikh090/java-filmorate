@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import ru.yandex.practicum.filmorate.model.Review;
@@ -19,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @JdbcTest
 @AutoConfigureTestDatabase
-@Import({ReviewDbStorage.class, ReviewRowMapper.class})
+@ComponentScan(basePackages = "ru.yandex.practicum.filmorate")
 public class ReviewDbStorageTests {
     private final ReviewStorage reviewStorage;
     private final JdbcTemplate jdbc;
