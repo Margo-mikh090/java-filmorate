@@ -27,33 +27,34 @@ public class ReviewService {
     public Review create(Review review) {
         log.info("Получен запрос на создание отзыва: {}", review);
         validateUserAndFilm(review.getUserId(), review.getFilmId());
-        review = reviewStorage.create(review);
+        Review createdReview = reviewStorage.create(review);
         eventService.addEvent(Event.builder()
-                .userId(review.getUserId())
-                .entityId(review.getReviewId())
+                .userId(createdReview.getUserId())
+                .entityId(createdReview.getReviewId())
                 .eventType(EventType.REVIEW)
                 .operation(Operation.ADD)
                 .build());
-        return review;
+        return createdReview;
     }
 
     public Review update(Review review) {
         log.info("Получен запрос на обновление отзыва с id={}", review.getReviewId());
         getById(review.getReviewId());
-        review = reviewStorage.update(review);
+        Review updatedReview = reviewStorage.update(review);
         eventService.addEvent(Event.builder()
-                .userId(review.getUserId())
-                .entityId(review.getReviewId())
+                .userId(updatedReview.getUserId())
+                .entityId(updatedReview.getReviewId())
                 .eventType(EventType.REVIEW)
                 .operation(Operation.UPDATE)
                 .build());
-        return review;
+        return updatedReview;
     }
 
     public void delete(Long id) {
         log.info("Получен запрос на удаление отзыва с id={}", id);
+        Review review = getById(id);
         eventService.addEvent(Event.builder()
-                .userId(reviewStorage.getById(id).get().getUserId())
+                .userId(review.getUserId())
                 .entityId(id)
                 .eventType(EventType.REVIEW)
                 .operation(Operation.REMOVE)
