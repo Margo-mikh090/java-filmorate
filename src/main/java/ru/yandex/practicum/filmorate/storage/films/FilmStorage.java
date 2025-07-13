@@ -15,7 +15,7 @@ public interface FilmStorage {
 
     Film update(Film film);
 
-    Collection<Film> getRating(long count);
+    Collection<Film> getRating(long count, Integer genreId, Integer year);
 
     Collection<Film> getDirectorFilm(long directorId, String sortBy);
 

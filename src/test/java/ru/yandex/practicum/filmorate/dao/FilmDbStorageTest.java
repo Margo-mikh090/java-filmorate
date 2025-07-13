@@ -32,7 +32,14 @@ public class FilmDbStorageTest {
 
     @BeforeEach
     public void beforeEach() {
+        jdbc.update("DELETE FROM likes");
+        jdbc.update("DELETE FROM users");
+        jdbc.update("DELETE FROM film_genres");
         jdbc.update("DELETE FROM films");
+
+        jdbc.update("INSERT INTO users (id, email, login, name, birthday) VALUES (1, 'user1@mail.com', 'login1', 'User 1', '1990-01-01')");
+        jdbc.update("INSERT INTO users (id, email, login, name, birthday) VALUES (2, 'user2@mail.com', 'login2', 'User 2', '1990-01-01')");
+        jdbc.update("INSERT INTO users (id, email, login, name, birthday) VALUES (3, 'user3@mail.com', 'login3', 'User 3', '1990-01-01')");
 
         film1 = new Film("name 1", "description 1", LocalDate.now(), 190);
         film1.setMpa(new MPA(3L, null));
@@ -47,6 +54,10 @@ public class FilmDbStorageTest {
         film2.setGenres(genres);
 
         film2 = filmDbStorage.create(film2);
+
+        jdbc.update("INSERT INTO likes (film_id, user_id) VALUES (?, ?)", film1.getId(), 1L);
+        jdbc.update("INSERT INTO likes (film_id, user_id) VALUES (?, ?)", film1.getId(), 2L);
+        jdbc.update("INSERT INTO likes (film_id, user_id) VALUES (?, ?)", film2.getId(), 1L);
     }
 
     @Test
@@ -96,5 +107,79 @@ public class FilmDbStorageTest {
         filmDbStorage.deleteById(film1.getId());
         Collection<Film> allFilms = filmDbStorage.getAll();
         assertThat(allFilms.size()).isEqualTo(1);
+    }
+
+    @Test
+    public void testGetRating_WithoutFilters() {
+        Collection<Film> result = filmDbStorage.getRating(10, null, null);
+        assertThat(result)
+                .hasSize(2)
+                .extracting(Film::getId)
+                .containsExactly(film1.getId(), film2.getId());
+    }
+
+    @Test
+    public void testGetRating_WithGenreFilter() {
+        jdbc.update("DELETE FROM film_genres WHERE film_id = ? AND genre_id = 1", film2.getId());
+        Collection<Film> result = filmDbStorage.getRating(10, 1, null);
+        assertThat(result)
+                .hasSize(1)
+                .extracting(Film::getId)
+                .containsExactly(film1.getId());
+    }
+
+    @Test
+    public void testGetRating_WithYearFilter() {
+        int currentYear = LocalDate.now().getYear();
+        Collection<Film> result = filmDbStorage.getRating(10, null, currentYear);
+        assertThat(result)
+                .hasSize(2)
+                .allMatch(f -> f.getReleaseDate().getYear() == currentYear);
+    }
+
+    @Test
+    public void testGetRating_WithLimit() {
+        Collection<Film> result = filmDbStorage.getRating(1, null, null);
+        assertThat(result)
+                .hasSize(1)
+                .extracting(Film::getId)
+                .containsExactly(film1.getId());
+    }
+
+    @Test
+    public void testGetRating_WithNonExistingGenre_ShouldReturnEmpty() {
+        Collection<Film> result = filmDbStorage.getRating(10, 999, null);
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    public void testGetRating_WithNonExistingYear_ShouldReturnEmpty() {
+        Collection<Film> result = filmDbStorage.getRating(10, null, 1800);
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    public void testGetRating_WithGenreAndYearFilters() {
+        jdbc.update("UPDATE films SET release_date = ? WHERE id = ?",
+                LocalDate.of(2000, 1, 1), film1.getId());
+        jdbc.update("UPDATE films SET release_date = ? WHERE id = ?",
+                LocalDate.of(2005, 1, 1), film2.getId());
+
+        Collection<Film> result = filmDbStorage.getRating(10, 1, 2000);
+        assertThat(result)
+                .hasSize(1)
+                .extracting(Film::getId)
+                .containsExactly(film1.getId());
+    }
+
+    @Test
+    public void testGetRating_OrderByLikes() {
+        jdbc.update("INSERT INTO likes (film_id, user_id) VALUES (?, ?)", film2.getId(), 2L);
+        jdbc.update("INSERT INTO likes (film_id, user_id) VALUES (?, ?)", film2.getId(), 3L);
+
+        Collection<Film> result = filmDbStorage.getRating(10, null, null);
+        assertThat(result)
+                .extracting(Film::getId)
+                .containsExactly(film2.getId(), film1.getId());
     }
 }

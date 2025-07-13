@@ -12,6 +12,7 @@ import ru.yandex.practicum.filmorate.storage.BaseDbStorage;
 import ru.yandex.practicum.filmorate.storage.director.DirectorStorage;
 import ru.yandex.practicum.filmorate.storage.genres.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.mappers.FilmRowMapper;
+
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
@@ -48,37 +49,45 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
     private static final String UPDATE = "UPDATE films SET name = ?, description = ?, release_date = ?, duration = ?, " +
             "mpa_id = ? WHERE id = ?";
 
-    private static final String GET_RATING = "SELECT f.id, f.name, f.description, f.release_date, f.duration, " +
-            "f.mpa_id, m.name AS mpa_name, ARRAY_AGG(DISTINCT g.genre_id) AS genres, ARRAY_AGG(DISTINCT l.user_id) AS likes " +
-            "FROM films AS f " +
-            "LEFT JOIN film_genres AS g ON f.id = g.film_id " +
-            "LEFT JOIN likes AS l ON f.id = l.film_id " +
-            "LEFT JOIN mpa AS m ON f.mpa_id = m.id " +
-            "GROUP BY f.id " +
-            "ORDER BY COUNT(l.user_id) DESC " +
-            "LIMIT ?";
+    private static final String GET_RATING = """
+            SELECT f.id, f.name, f.description, f.release_date, f.duration,
+                   f.mpa_id, m.name AS mpa_name,
+            ARRAY_AGG(DISTINCT g.genre_id) AS genres,
+            ARRAY_AGG(DISTINCT l.user_id) AS likes
+            FROM films AS f
+            LEFT JOIN film_genres AS g ON f.id = g.film_id
+            LEFT JOIN likes AS l ON f.id = l.film_id
+            LEFT JOIN mpa AS m ON f.mpa_id = m.id
+            WHERE (? IS NULL OR EXISTS (
+                SELECT 1 FROM film_genres WHERE film_id = f.id AND genre_id = ?
+            ))
+            AND (? IS NULL OR EXTRACT(YEAR FROM f.release_date) = ?)
+            GROUP BY f.id
+            ORDER BY COUNT(l.user_id) DESC
+            LIMIT ?
+            """;
 
     private static final String FILM_DIRECTOR =
             """
-            SELECT f.id, f.name, f.description, f.release_date, f.duration,
-                   f.mpa_id, m.name AS mpa_name, ARRAY_AGG(DISTINCT g.genre_id) AS genres, ARRAY_AGG(DISTINCT l.user_id) AS likes
-              FROM films f
-                   JOIN film_director fd
-                     ON fd.film_id = f.id
-                   LEFT JOIN (SELECT l.film_id,
-                                     count(*) likes_count
-                                FROM likes l
-                               GROUP BY l.film_id) fl_count
-                          ON fl_count.film_id = f.id
-                   LEFT JOIN film_genres AS g ON f.id = g.film_id
-                   LEFT JOIN likes AS l ON f.id = l.film_id
-                   LEFT JOIN mpa AS m ON f.mpa_id = m.id
-             WHERE fd.director_id = ?
-             GROUP BY f.id
-             ORDER BY DECODE(lower(?), 'year', EXTRACT(YEAR FROM f.release_date)) NULLS LAST,
-                      DECODE(lower(?), 'likes', fl_count.likes_count) DESC NULLS LAST,
-                      f.id
-            """;
+                    SELECT f.id, f.name, f.description, f.release_date, f.duration,
+                           f.mpa_id, m.name AS mpa_name, ARRAY_AGG(DISTINCT g.genre_id) AS genres, ARRAY_AGG(DISTINCT l.user_id) AS likes
+                      FROM films f
+                           JOIN film_director fd
+                             ON fd.film_id = f.id
+                           LEFT JOIN (SELECT l.film_id,
+                                             count(*) likes_count
+                                        FROM likes l
+                                       GROUP BY l.film_id) fl_count
+                                  ON fl_count.film_id = f.id
+                           LEFT JOIN film_genres AS g ON f.id = g.film_id
+                           LEFT JOIN likes AS l ON f.id = l.film_id
+                           LEFT JOIN mpa AS m ON f.mpa_id = m.id
+                     WHERE fd.director_id = ?
+                     GROUP BY f.id
+                     ORDER BY DECODE(lower(?), 'year', EXTRACT(YEAR FROM f.release_date)) NULLS LAST,
+                              DECODE(lower(?), 'likes', fl_count.likes_count) DESC NULLS LAST,
+                              f.id
+                    """;
 
     private static final String USER_EXISTS = "SELECT COUNT(1) FROM users WHERE id = ?";
 
@@ -105,6 +114,7 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
     @Override
     public Collection<Film> getAll() {
         final Collection<Film> films = getAll(GET_ALL);
+        final Map<Long, Set<Director>> directorIndexByFilm = directorStorage.findAllIndexByFilmId();
         return addDirectorsToCollection(films);
     }
 
@@ -161,11 +171,13 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
     }
 
     @Override
-    public Collection<Film> getRating(long count) {
-        final Collection<Film> films = jdbc.query(GET_RATING, mapper, count);
-        return addDirectorsToCollection(films);
+    public Collection<Film> getRating(long count, Integer genreId, Integer year) {
+        return addDirectorsToCollection(
+                jdbc.query(GET_RATING, mapper, genreId, genreId, year, year, count)
+        );
     }
 
+    @Override
     public Collection<Film> getDirectorFilm(long directorId, String sortBy) {
         final Collection<Film> films = jdbc.query(FILM_DIRECTOR, mapper, directorId, sortBy, sortBy);
         return addDirectorsToCollection(films);

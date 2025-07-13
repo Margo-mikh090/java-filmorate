@@ -93,7 +93,7 @@ public class LikeDbStorageTest {
         int rows = jdbc.queryForObject("SELECT COUNT(*) FROM likes", Integer.class);
         assertThat(rows).isEqualTo(3);
 
-        List<Film> filmsRate = (List<Film>) filmDbStorage.getRating(2);
+        List<Film> filmsRate = (List<Film>) filmDbStorage.getRating(2, null, null);
         assertThat(filmsRate.size()).isEqualTo(2);
 
         assertThat(filmsRate.getFirst().getId()).isEqualTo(film.getId());
