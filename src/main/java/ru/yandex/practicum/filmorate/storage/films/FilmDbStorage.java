@@ -49,49 +49,23 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
     private static final String UPDATE = "UPDATE films SET name = ?, description = ?, release_date = ?, duration = ?, " +
             "mpa_id = ? WHERE id = ?";
 
-    private static final String GET_RATING = "SELECT f.id, f.name, f.description, f.release_date, f.duration, " +
-            "f.mpa_id, m.name AS mpa_name, ARRAY_AGG(DISTINCT g.genre_id) AS genres, ARRAY_AGG(DISTINCT l.user_id) AS likes " +
-            "FROM films AS f " +
-            "LEFT JOIN film_genres AS g ON f.id = g.film_id " +
-            "LEFT JOIN likes AS l ON f.id = l.film_id " +
-            "LEFT JOIN mpa AS m ON f.mpa_id = m.id " +
-            "GROUP BY f.id " +
-            "ORDER BY COUNT(l.user_id) DESC " +
-            "LIMIT ?";
-
-    private static final String GET_RATING_BY_GENRE = "SELECT f.id, f.name, f.description, f.release_date, f.duration, " +
-            "f.mpa_id, m.name AS mpa_name, ARRAY_AGG(DISTINCT g.genre_id) AS genres, ARRAY_AGG(DISTINCT l.user_id) AS likes " +
-            "FROM films AS f " +
-            "LEFT JOIN film_genres AS g ON f.id = g.film_id " +
-            "LEFT JOIN likes AS l ON f.id = l.film_id " +
-            "LEFT JOIN mpa AS m ON f.mpa_id = m.id " +
-            "WHERE EXISTS (SELECT 1 FROM film_genres WHERE film_id = f.id AND genre_id = ?) " +
-            "GROUP BY f.id " +
-            "ORDER BY COUNT(l.user_id) DESC " +
-            "LIMIT ?";
-
-    private static final String GET_RATING_BY_YEAR = "SELECT f.id, f.name, f.description, f.release_date, f.duration, " +
-            "f.mpa_id, m.name AS mpa_name, ARRAY_AGG(DISTINCT g.genre_id) AS genres, ARRAY_AGG(DISTINCT l.user_id) AS likes " +
-            "FROM films AS f " +
-            "LEFT JOIN film_genres AS g ON f.id = g.film_id " +
-            "LEFT JOIN likes AS l ON f.id = l.film_id " +
-            "LEFT JOIN mpa AS m ON f.mpa_id = m.id " +
-            "WHERE EXTRACT(YEAR FROM f.release_date) = ? " +
-            "GROUP BY f.id " +
-            "ORDER BY COUNT(l.user_id) DESC " +
-            "LIMIT ?";
-
-    private static final String GET_RATING_BY_GENRE_AND_YEAR = "SELECT f.id, f.name, f.description, f.release_date, f.duration, " +
-            "f.mpa_id, m.name AS mpa_name, ARRAY_AGG(DISTINCT g.genre_id) AS genres, ARRAY_AGG(DISTINCT l.user_id) AS likes " +
-            "FROM films AS f " +
-            "LEFT JOIN film_genres AS g ON f.id = g.film_id " +
-            "LEFT JOIN likes AS l ON f.id = l.film_id " +
-            "LEFT JOIN mpa AS m ON f.mpa_id = m.id " +
-            "WHERE EXISTS (SELECT 1 FROM film_genres WHERE film_id = f.id AND genre_id = ?) " +
-            "AND EXTRACT(YEAR FROM f.release_date) = ? " +
-            "GROUP BY f.id " +
-            "ORDER BY COUNT(l.user_id) DESC " +
-            "LIMIT ?";
+    private static final String GET_RATING = """
+            SELECT f.id, f.name, f.description, f.release_date, f.duration,
+                   f.mpa_id, m.name AS mpa_name,
+            ARRAY_AGG(DISTINCT g.genre_id) AS genres,
+            ARRAY_AGG(DISTINCT l.user_id) AS likes
+            FROM films AS f
+            LEFT JOIN film_genres AS g ON f.id = g.film_id
+            LEFT JOIN likes AS l ON f.id = l.film_id
+            LEFT JOIN mpa AS m ON f.mpa_id = m.id
+            WHERE (? IS NULL OR EXISTS (
+                SELECT 1 FROM film_genres WHERE film_id = f.id AND genre_id = ?
+            ))
+            AND (? IS NULL OR EXTRACT(YEAR FROM f.release_date) = ?)
+            GROUP BY f.id
+            ORDER BY COUNT(l.user_id) DESC
+            LIMIT ?
+            """;
 
     private static final String FILM_DIRECTOR =
             """
@@ -198,19 +172,9 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
 
     @Override
     public Collection<Film> getRating(long count, Integer genreId, Integer year) {
-        final Collection<Film> films;
-
-        if (genreId != null && year != null) {
-            films = jdbc.query(GET_RATING_BY_GENRE_AND_YEAR, mapper, genreId, year, count);
-        } else if (genreId != null) {
-            films = jdbc.query(GET_RATING_BY_GENRE, mapper, genreId, count);
-        } else if (year != null) {
-            films = jdbc.query(GET_RATING_BY_YEAR, mapper, year, count);
-        } else {
-            films = jdbc.query(GET_RATING, mapper, count);  // Этот случай обрабатывает ситуацию, когда оба параметра null
-        }
-
-        return addDirectorsToCollection(films);
+        return addDirectorsToCollection(
+                jdbc.query(GET_RATING, mapper, genreId, genreId, year, year, count)
+        );
     }
 
     @Override

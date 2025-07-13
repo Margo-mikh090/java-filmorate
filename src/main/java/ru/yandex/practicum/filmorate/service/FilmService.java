@@ -62,11 +62,8 @@ public class FilmService {
             );
         }
 
-        if (genreId != null || year != null) {
-            return filmStorage.getRating(Integer.MAX_VALUE, genreId, year).stream().toList();
-        }
-
-        return filmStorage.getRating(count, null, null).stream().toList();
+        long limit = (genreId != null || year != null) ? Integer.MAX_VALUE : count;
+        return filmStorage.getRating(limit, genreId, year).stream().toList();
     }
 
     public List<Film> getDirectorFilm(long directorId, String sortBy) {
