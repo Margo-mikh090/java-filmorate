@@ -53,7 +53,7 @@ public class FilmService {
         likeDbStorage.removeLike(userId, filmId);
     }
 
-    public List<Film> getRating(Integer count, Integer genreId, Integer year) {
+    public List<Film> getRating(long count, Integer genreId, Integer year) {
         log.info("Запрос на топ фильмов (count: {}, жанр: {}, год: {})", count, genreId, year);
 
         if (count <= 0) {
@@ -72,5 +72,10 @@ public class FilmService {
     public List<Film> getDirectorFilm(long directorId, String sortBy) {
         log.info("Запрос на получение списка фильмов для директора id={} с сортировкой={}", directorId, sortBy);
         return filmStorage.getDirectorFilm(directorId, sortBy).stream().toList();
+    }
+
+    public List<Film> getCommonFilms(long firstUserId, long secondUserId) {
+        log.info("Запрос на получение списка общих фильмов между пользователями с id {} и {}", firstUserId, secondUserId);
+        return filmStorage.getCommonFilms(firstUserId, secondUserId).stream().toList();
     }
 }

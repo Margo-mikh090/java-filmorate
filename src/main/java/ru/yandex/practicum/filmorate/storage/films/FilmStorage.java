@@ -18,4 +18,6 @@ public interface FilmStorage {
     Collection<Film> getRating(long count, Integer genreId, Integer year);
 
     Collection<Film> getDirectorFilm(long directorId, String sortBy);
+
+    Collection<Film> getCommonFilms(long firstUserId, long secondUserId);
 }
