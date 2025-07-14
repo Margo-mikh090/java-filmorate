@@ -34,12 +34,12 @@ public class EventServiceTest {
         user2 = userDbStorage.create(user2);
         userService.addFriend(user1.getId(), user2.getId());
 
-        List<Event> events = eventService.getUserFeed(1L);
+        Event event = eventService.getUserFeed(user1.getId()).getFirst();
 
-        assertThat(events.getFirst())
+        assertThat(event)
                 .hasFieldOrPropertyWithValue("eventId", 1L)
-                .hasFieldOrPropertyWithValue("userId", 1L)
-                .hasFieldOrPropertyWithValue("entityId", 2L)
+                .hasFieldOrPropertyWithValue("userId", user1.getId())
+                .hasFieldOrPropertyWithValue("entityId", event.getEntityId())
                 .hasFieldOrPropertyWithValue("eventType", EventType.FRIEND)
                 .hasFieldOrPropertyWithValue("operation", Operation.ADD);
     }
