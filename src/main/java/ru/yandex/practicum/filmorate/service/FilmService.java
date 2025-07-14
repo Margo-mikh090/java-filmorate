@@ -91,4 +91,9 @@ public class FilmService {
         log.info("Запрос на получение списка общих фильмов между пользователями с id {} и {}", firstUserId, secondUserId);
         return filmStorage.getCommonFilms(firstUserId, secondUserId).stream().toList();
     }
+
+    public List<Film> searchFilms(String query, boolean searchByTitle, boolean searchByDirector) {
+        log.info("Запрос на поиск фильмов с подстрокой {}, поиск по searchByTitle={} searchByDirector={}", query, searchByTitle, searchByDirector);
+        return filmStorage.searchFilms(query, searchByTitle, searchByDirector).stream().toList();
+    }
 }

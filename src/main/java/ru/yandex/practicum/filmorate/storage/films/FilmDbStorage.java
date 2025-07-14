@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.exception.ConditionsNotMetException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -14,9 +15,11 @@ import ru.yandex.practicum.filmorate.storage.genres.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.mappers.FilmRowMapper;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Set;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 @Repository
 @Primary
@@ -105,6 +108,13 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
             "GROUP BY f.id " +
             "ORDER BY COUNT(l.user_id) DESC";
 
+    public static final String BASE_FILM_QUERY = "SELECT f.id, f.name, f.description, f.release_date, f.duration, " +
+            "f.mpa_id, m.name AS mpa_name, ARRAY_AGG(DISTINCT g.genre_id) AS genres, ARRAY_AGG(DISTINCT l.user_id) AS likes " +
+            "FROM films AS f " +
+            "LEFT JOIN film_genres AS g ON f.id = g.film_id " +
+            "LEFT JOIN likes AS l ON f.id = l.film_id " +
+            "LEFT JOIN mpa AS m ON f.mpa_id = m.id ";
+
     public FilmDbStorage(JdbcTemplate jdbc, FilmRowMapper mapper, GenreStorage genreDbStorage, DirectorStorage directorStorage) {
         super(jdbc, mapper);
         this.genreDbStorage = genreDbStorage;
@@ -114,7 +124,6 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
     @Override
     public Collection<Film> getAll() {
         final Collection<Film> films = getAll(GET_ALL);
-        final Map<Long, Set<Director>> directorIndexByFilm = directorStorage.findAllIndexByFilmId();
         return addDirectorsToCollection(films);
     }
 
@@ -189,6 +198,32 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
             throw new NotFoundException("Данные не найдены");
         }
         final Collection<Film> films = jdbc.query(GET_COMMON_FILMS, mapper, firstUserId, secondUserId);
+        return addDirectorsToCollection(films);
+    }
+
+    @Override
+    public Collection<Film> searchFilms(String query, boolean searchByTitle, boolean searchByDirector) {
+        StringBuilder search_film_query = new StringBuilder(BASE_FILM_QUERY);
+        List<String> searchQuery = new ArrayList<>();
+        List<String> conditions = new ArrayList<>();
+
+        if (searchByDirector) {
+            search_film_query.append("LEFT JOIN film_director AS fd ON f.id = fd.film_id ");
+            search_film_query.append("LEFT JOIN director AS d ON fd.director_id = d.id ");
+            conditions.add("LOWER(d.name) LIKE LOWER(CONCAT('%', ?, '%')) ");
+            searchQuery.add(query);
+        }
+        if (searchByTitle) {
+            conditions.add("LOWER(f.name) LIKE LOWER(CONCAT('%', ?, '%')) ");
+            searchQuery.add(query);
+        }
+        if (conditions.isEmpty()) {
+            throw new ConditionsNotMetException("Поиск возможен только по параметрам title и director");
+        }
+
+        search_film_query.append("WHERE ").append(String.join(" OR ", conditions));
+        search_film_query.append("GROUP BY f.id ORDER BY COUNT(l.user_id) DESC");
+        Collection<Film> films = jdbc.query(search_film_query.toString(), mapper, searchQuery.toArray());
         return addDirectorsToCollection(films);
     }
 
