@@ -155,7 +155,7 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
 
             directorStorage.saveFilmDirectors(id, film.getDirectors());
 
-            return getById(GET_BY_ID, id);
+            return getById(id);
         } catch (DataIntegrityViolationException e) {
             throw new NotFoundException("Данные не найдены");
         }
