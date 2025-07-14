@@ -203,13 +203,13 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
 
     @Override
     public Collection<Film> searchFilms(String query, boolean searchByTitle, boolean searchByDirector) {
-        StringBuilder search_film_query = new StringBuilder(BASE_FILM_QUERY);
+        StringBuilder searchFilmQuery = new StringBuilder(BASE_FILM_QUERY);
         List<String> searchQuery = new ArrayList<>();
         List<String> conditions = new ArrayList<>();
 
         if (searchByDirector) {
-            search_film_query.append("LEFT JOIN film_director AS fd ON f.id = fd.film_id ");
-            search_film_query.append("LEFT JOIN director AS d ON fd.director_id = d.id ");
+            searchFilmQuery.append("LEFT JOIN film_director AS fd ON f.id = fd.film_id ");
+            searchFilmQuery.append("LEFT JOIN director AS d ON fd.director_id = d.id ");
             conditions.add("LOWER(d.name) LIKE LOWER(CONCAT('%', ?, '%')) ");
             searchQuery.add(query);
         }
@@ -221,9 +221,9 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
             throw new ConditionsNotMetException("Поиск возможен только по параметрам title и director");
         }
 
-        search_film_query.append("WHERE ").append(String.join(" OR ", conditions));
-        search_film_query.append("GROUP BY f.id ORDER BY COUNT(l.user_id) DESC");
-        Collection<Film> films = jdbc.query(search_film_query.toString(), mapper, searchQuery.toArray());
+        searchFilmQuery.append("WHERE ").append(String.join(" OR ", conditions));
+        searchFilmQuery.append("GROUP BY f.id ORDER BY COUNT(l.user_id) DESC");
+        Collection<Film> films = jdbc.query(searchFilmQuery.toString(), mapper, searchQuery.toArray());
         return addDirectorsToCollection(films);
     }
 
