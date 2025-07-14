@@ -15,8 +15,6 @@ import ru.yandex.practicum.filmorate.storage.genres.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.mappers.FilmRowMapper;
 
 import java.util.Collection;
-import java.util.List;
-import java.util.ArrayList;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Map;
@@ -120,7 +118,7 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
             "(? = true AND LOWER(d.name) LIKE LOWER(CONCAT('%', ?, '%'))) OR " +
             "(? = true AND LOWER(f.name) LIKE LOWER(CONCAT('%', ?, '%'))) " +
             "GROUP BY f.id ORDER BY COUNT(l.user_id) DESC";
-    
+
     public FilmDbStorage(JdbcTemplate jdbc, FilmRowMapper mapper, GenreStorage genreDbStorage, DirectorStorage directorStorage) {
         super(jdbc, mapper);
         this.genreDbStorage = genreDbStorage;
