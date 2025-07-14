@@ -5,7 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ConditionsNotMetException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.Review;
+import ru.yandex.practicum.filmorate.model.enums.EventType;
+import ru.yandex.practicum.filmorate.model.enums.Operation;
 import ru.yandex.practicum.filmorate.storage.films.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.reviews.ReviewStorage;
 import ru.yandex.practicum.filmorate.storage.users.UserStorage;
@@ -19,21 +22,43 @@ public class ReviewService {
     private final ReviewStorage reviewStorage;
     private final UserStorage userStorage;
     private final FilmStorage filmStorage;
+    private final EventService eventService;
 
     public Review create(Review review) {
         log.info("Получен запрос на создание отзыва: {}", review);
         validateUserAndFilm(review.getUserId(), review.getFilmId());
-        return reviewStorage.create(review);
+        Review createdReview = reviewStorage.create(review);
+        eventService.addEvent(Event.builder()
+                .userId(createdReview.getUserId())
+                .entityId(createdReview.getReviewId())
+                .eventType(EventType.REVIEW)
+                .operation(Operation.ADD)
+                .build());
+        return createdReview;
     }
 
     public Review update(Review review) {
         log.info("Получен запрос на обновление отзыва с id={}", review.getReviewId());
         getById(review.getReviewId());
-        return reviewStorage.update(review);
+        Review updatedReview = reviewStorage.update(review);
+        eventService.addEvent(Event.builder()
+                .userId(updatedReview.getUserId())
+                .entityId(updatedReview.getReviewId())
+                .eventType(EventType.REVIEW)
+                .operation(Operation.UPDATE)
+                .build());
+        return updatedReview;
     }
 
     public void delete(Long id) {
         log.info("Получен запрос на удаление отзыва с id={}", id);
+        Review review = getById(id);
+        eventService.addEvent(Event.builder()
+                .userId(review.getUserId())
+                .entityId(id)
+                .eventType(EventType.REVIEW)
+                .operation(Operation.REMOVE)
+                .build());
         reviewStorage.delete(id);
     }
 
