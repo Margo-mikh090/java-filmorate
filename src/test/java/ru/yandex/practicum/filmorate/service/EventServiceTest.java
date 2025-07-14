@@ -33,7 +33,7 @@ public class EventServiceTest {
         user2 = userDbStorage.create(user2);
         userService.addFriend(user1.getId(), user2.getId());
 
-        Event actual = eventService.getUserFeed(1L).getFirst();
+        Event actual = eventService.getUserFeed(1L).get(0);
 
         assertThat(actual)
                 .hasFieldOrPropertyWithValue("eventId", 1L)
