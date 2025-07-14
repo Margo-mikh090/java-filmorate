@@ -13,6 +13,7 @@ import ru.yandex.practicum.filmorate.model.enums.Operation;
 import ru.yandex.practicum.filmorate.storage.users.UserDbStorage;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -33,9 +34,9 @@ public class EventServiceTest {
         user2 = userDbStorage.create(user2);
         userService.addFriend(user1.getId(), user2.getId());
 
-        Event actual = eventService.getUserFeed(1L).getFirst();
+        List<Event> events = eventService.getUserFeed(1L);
 
-        assertThat(actual)
+        assertThat(events.getFirst())
                 .hasFieldOrPropertyWithValue("eventId", 1L)
                 .hasFieldOrPropertyWithValue("userId", 1L)
                 .hasFieldOrPropertyWithValue("entityId", 2L)
