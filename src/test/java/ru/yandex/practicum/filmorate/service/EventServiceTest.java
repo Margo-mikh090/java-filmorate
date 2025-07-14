@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -12,7 +13,6 @@ import ru.yandex.practicum.filmorate.model.enums.EventType;
 import ru.yandex.practicum.filmorate.model.enums.Operation;
 import ru.yandex.practicum.filmorate.storage.users.UserDbStorage;
 
-import java.time.Instant;
 import java.time.LocalDate;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -26,28 +26,24 @@ public class EventServiceTest {
     private final UserService userService;
     private final EventService eventService;
 
-    @Test
-    public void testGetAllEventsByUserId() {
-        Event expectedEvent = Event.builder()
-                .eventId(1L)
-                .userId(1L)
-                .entityId(2L)
-                .eventType(EventType.FRIEND)
-                .operation(Operation.ADD)
-                .timestamp(Instant.now())
-                .build();
-
+    @BeforeEach
+    public void beforeEach() {
         User user1 = new User("email@1gmail.com", "login1", "name 1", LocalDate.now());
         user1 = userDbStorage.create(user1);
         User user2 = new User("email@2gmail.com", "login2", "name 2", LocalDate.now());
         user2 = userDbStorage.create(user2);
         userService.addFriend(user1.getId(), user2.getId());
+    }
 
+    @Test
+    public void testGetAllEventsByUserId() {
         Event actual = eventService.getUserFeed(1L).getFirst();
 
         assertThat(actual)
-                .usingRecursiveComparison()
-                .ignoringFields("timestamp")
-                .isEqualTo(expectedEvent);
+                .hasFieldOrPropertyWithValue("eventId", 1L)
+                .hasFieldOrPropertyWithValue("userId", 1L)
+                .hasFieldOrPropertyWithValue("entityId", 2L)
+                .hasFieldOrPropertyWithValue("eventType", EventType.FRIEND)
+                .hasFieldOrPropertyWithValue("operation", Operation.ADD);
     }
 }
