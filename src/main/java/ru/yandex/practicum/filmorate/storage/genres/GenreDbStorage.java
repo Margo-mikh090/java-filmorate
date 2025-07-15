@@ -44,4 +44,9 @@ public class GenreDbStorage extends BaseDbStorage<Genre> implements GenreStorage
             throw new NotFoundException("Данные не найдены");
         }
     }
+
+    @Override
+    public void removeFilmGenres(long filmId) {
+        jdbc.update("DELETE FROM film_genres WHERE film_id = ?", filmId);
+    }
 }

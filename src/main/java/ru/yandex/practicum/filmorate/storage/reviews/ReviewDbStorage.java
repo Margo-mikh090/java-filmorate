@@ -25,7 +25,13 @@ public class ReviewDbStorage extends BaseDbStorage<Review> implements ReviewStor
     }
 
     private static final String GET_BY_ID = "SELECT * FROM reviews WHERE review_id = ?";
-    private static final String GET_BY_FILM_ID = "SELECT * FROM reviews WHERE film_id = ? ORDER BY useful DESC LIMIT ?";
+
+    private static final String GET_BY_FILM_ID =
+            "SELECT * FROM reviews " +
+                    "WHERE (? IS NULL OR film_id = ?) " +
+                    "ORDER BY useful DESC " +
+                    "LIMIT ?";
+
     private static final String UPDATE = "UPDATE reviews SET content = ?, is_positive = ? WHERE review_id = ?";
     private static final String DELETE = "DELETE FROM reviews WHERE review_id = ?";
     private static final String GET_USER_RATING = "SELECT is_positive FROM review_likes WHERE review_id = ? AND user_id = ?";
@@ -79,7 +85,11 @@ public class ReviewDbStorage extends BaseDbStorage<Review> implements ReviewStor
 
     @Override
     public List<Review> getReviewsByFilmId(Long filmId, int count) {
-        return jdbc.query(GET_BY_FILM_ID, reviewRowMapper, filmId, count);
+        return jdbc.query(GET_BY_FILM_ID, reviewRowMapper,
+                filmId,
+                filmId,
+                count
+        );
     }
 
     @Override

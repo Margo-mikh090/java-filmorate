@@ -14,16 +14,15 @@ import ru.yandex.practicum.filmorate.storage.director.DirectorStorage;
 import ru.yandex.practicum.filmorate.storage.genres.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.mappers.FilmRowMapper;
 
-import java.util.Collection;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
+
 
 @Repository
 @Primary
 public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
     private final GenreStorage genreDbStorage;
     private final DirectorStorage directorStorage;
+
 
     private static final String GET_ALL = "SELECT f.id, f.name, f.description, f.release_date, f.duration, " +
             "f.mpa_id, m.name AS mpa_name, ARRAY_AGG(DISTINCT g.genre_id) AS genres, ARRAY_AGG(DISTINCT l.user_id) AS likes " +
@@ -41,6 +40,7 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
             "LEFT JOIN mpa AS m ON f.mpa_id = m.id " +
             "WHERE f.id = ? " +
             "GROUP BY f.id";
+
 
     private static final String DELETE_BY_ID = "DELETE FROM films WHERE id = ?";
 
@@ -68,6 +68,7 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
             LIMIT ?
             """;
 
+
     private static final String FILM_DIRECTOR =
             """
                     SELECT f.id, f.name, f.description, f.release_date, f.duration,
@@ -90,6 +91,7 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
                               f.id
                     """;
 
+
     private static final String USER_EXISTS = "SELECT COUNT(1) FROM users WHERE id = ?";
 
     private static final String GET_COMMON_FILMS = "SELECT f.id, f.name, f.description, f.release_date, f.duration, " +
@@ -106,6 +108,7 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
             "GROUP BY f.id " +
             "ORDER BY COUNT(l.user_id) DESC";
 
+
     public static final String SEARCH_FILM_QUERY = "SELECT f.id, f.name, f.description, f.release_date, f.duration, " +
             "f.mpa_id, m.name AS mpa_name, ARRAY_AGG(DISTINCT g.genre_id) AS genres, ARRAY_AGG(DISTINCT l.user_id) AS likes " +
             "FROM films AS f " +
@@ -118,6 +121,7 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
             "(? = true AND LOWER(d.name) LIKE LOWER(CONCAT('%', ?, '%'))) OR " +
             "(? = true AND LOWER(f.name) LIKE LOWER(CONCAT('%', ?, '%'))) " +
             "GROUP BY f.id ORDER BY COUNT(l.user_id) DESC";
+
 
     public FilmDbStorage(JdbcTemplate jdbc, FilmRowMapper mapper, GenreStorage genreDbStorage, DirectorStorage directorStorage) {
         super(jdbc, mapper);
@@ -173,6 +177,8 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
                 film.getDuration(),
                 film.getMpa().getId(),
                 film.getId());
+
+        genreDbStorage.removeFilmGenres(film.getId());
 
         for (Genre genre : film.getGenres()) {
             genreDbStorage.addFilmGenre(film.getId(), genre.getId());

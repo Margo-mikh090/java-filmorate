@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.storage.events;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.storage.BaseDbStorage;
 import ru.yandex.practicum.filmorate.storage.mappers.EventRowMapper;
@@ -30,6 +31,10 @@ public class EventDbStorage extends BaseDbStorage<Event> implements EventStorage
 
     @Override
     public List<Event> getAllEventsByUserId(long userId) {
-        return findMany(GET_ALL_EVENTS_BY_USER_ID, userId);
+        List<Event> events = findMany(GET_ALL_EVENTS_BY_USER_ID, userId);
+        if (events.isEmpty()) {
+            throw new NotFoundException("Событий по пользователю не найдено");
+        }
+        return events;
     }
 }
