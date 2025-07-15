@@ -39,11 +39,17 @@ public class UserService {
 
     public User create(User user) {
         log.info("Запрос на создание пользователя с данными: {}", user);
+        if (user.getName().isBlank()) {
+            user.setName(user.getLogin());
+        }
         return userStorage.create(user);
     }
 
     public User update(User userToUpdate) {
         log.info("Запрос на обновление пользователя с данными: {}", userToUpdate);
+        if (userToUpdate.getName().isBlank()) {
+            userToUpdate.setName(userToUpdate.getLogin());
+        }
         return userStorage.update(userToUpdate);
     }
 
