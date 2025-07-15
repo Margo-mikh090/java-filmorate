@@ -85,9 +85,7 @@ public class ReviewDbStorage extends BaseDbStorage<Review> implements ReviewStor
 
     @Override
     public List<Review> getReviewsByFilmId(Long filmId, int count) {
-        return jdbc.query(
-                GET_BY_FILM_ID,
-                reviewRowMapper,
+        return jdbc.query(GET_BY_FILM_ID, reviewRowMapper,
                 filmId,
                 filmId,
                 count
