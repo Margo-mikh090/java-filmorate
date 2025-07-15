@@ -193,6 +193,9 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
     @Override
     public Collection<Film> getDirectorFilm(long directorId, String sortBy) {
         final Collection<Film> films = jdbc.query(FILM_DIRECTOR, mapper, directorId, sortBy, sortBy);
+        if (films.isEmpty()) {
+            throw new NotFoundException("Для директора " + directorId + " не найдено ни одного фильма");
+        }
         return addDirectorsToCollection(films);
     }
 
