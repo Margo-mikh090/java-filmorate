@@ -10,6 +10,7 @@ import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.model.enums.EventType;
 import ru.yandex.practicum.filmorate.model.enums.Operation;
 import ru.yandex.practicum.filmorate.storage.films.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.reviews.ReviewLikeStorage;
 import ru.yandex.practicum.filmorate.storage.reviews.ReviewStorage;
 import ru.yandex.practicum.filmorate.storage.users.UserStorage;
 
@@ -20,6 +21,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ReviewService {
     private final ReviewStorage reviewStorage;
+    private final ReviewLikeStorage reviewLikeStorage;
     private final UserStorage userStorage;
     private final FilmStorage filmStorage;
     private final EventService eventService;
@@ -89,13 +91,13 @@ public class ReviewService {
     public void removeLike(Long reviewId, Long userId) {
         log.info("Получен запрос на удаление лайка отзыву с id={} от пользователя с id={}", reviewId, userId);
         validateReviewAndUser(reviewId, userId);
-        reviewStorage.removeLike(reviewId, userId);
+        reviewLikeStorage.removeLike(reviewId, userId);
     }
 
     public void removeDislike(Long reviewId, Long userId) {
         log.info("Получен запрос на удаление дизлайка отзыву с id={} от пользователя с id={}", reviewId, userId);
         validateReviewAndUser(reviewId, userId);
-        reviewStorage.removeDislike(reviewId, userId);
+        reviewLikeStorage.removeDislike(reviewId, userId);
     }
 
     private void validateAndUpdateRating(Long reviewId, Long userId, boolean isLike) {
@@ -109,9 +111,9 @@ public class ReviewService {
         }
 
         if (isLike) {
-            reviewStorage.addLike(reviewId, userId);
+            reviewLikeStorage.addLike(reviewId, userId);
         } else {
-            reviewStorage.addDislike(reviewId, userId);
+            reviewLikeStorage.addDislike(reviewId, userId);
         }
     }
 

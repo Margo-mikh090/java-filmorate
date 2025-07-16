@@ -8,37 +8,38 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.jdbc.core.JdbcTemplate;
 import ru.yandex.practicum.filmorate.model.Review;
+import ru.yandex.practicum.filmorate.storage.reviews.ReviewLikeStorage;
 import ru.yandex.practicum.filmorate.storage.reviews.ReviewStorage;
 
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @JdbcTest
 @AutoConfigureTestDatabase
 @ComponentScan(basePackages = "ru.yandex.practicum.filmorate")
 public class ReviewDbStorageTests {
     private final ReviewStorage reviewStorage;
+    private final ReviewLikeStorage reviewLikeStorage;
     private final JdbcTemplate jdbc;
     private Review review1;
     private Review review2;
 
     @Autowired
-    public ReviewDbStorageTests(ReviewStorage reviewStorage, JdbcTemplate jdbc) {
+    public ReviewDbStorageTests(ReviewStorage reviewStorage, ReviewLikeStorage reviewLikeStorage, JdbcTemplate jdbc) {
         this.reviewStorage = reviewStorage;
+        this.reviewLikeStorage = reviewLikeStorage;
         this.jdbc = jdbc;
     }
 
     @BeforeEach
     void setUp() {
-        // Очистка данных
         jdbc.update("DELETE FROM review_likes");
         jdbc.update("DELETE FROM reviews");
         jdbc.update("DELETE FROM films");
         jdbc.update("DELETE FROM users");
 
-        // Подготовка тестовых данных
         jdbc.update("INSERT INTO users (id, email, login, name, birthday) VALUES (?, ?, ?, ?, ?)",
                 1L, "user1@mail.com", "login1", "User 1", "1990-01-01");
         jdbc.update("INSERT INTO users (id, email, login, name, birthday) VALUES (?, ?, ?, ?, ?)",
@@ -49,7 +50,6 @@ public class ReviewDbStorageTests {
         jdbc.update("INSERT INTO films (id, name, description, release_date, duration, mpa_id) VALUES (?, ?, ?, ?, ?, ?)",
                 2L, "Film 2", "Description 2", "2000-01-01", 120, 1);
 
-        // Создание тестовых отзывов
         review1 = reviewStorage.create(Review.builder()
                 .content("Отличный фильм!")
                 .isPositive(true)
@@ -76,12 +76,12 @@ public class ReviewDbStorageTests {
 
         Review created = reviewStorage.create(newReview);
 
-        assertNotNull(created.getReviewId());
-        assertEquals("Новый отзыв", created.getContent());
-        assertEquals(1L, created.getUserId());
-        assertEquals(2L, created.getFilmId());
-        assertTrue(created.getIsPositive());
-        assertEquals(0, created.getUseful());
+        assertThat(created.getReviewId()).isNotNull();
+        assertThat(created.getContent()).isEqualTo("Новый отзыв");
+        assertThat(created.getUserId()).isEqualTo(1L);
+        assertThat(created.getFilmId()).isEqualTo(2L);
+        assertThat(created.getIsPositive()).isTrue();
+        assertThat(created.getUseful()).isZero();
     }
 
     @Test
@@ -91,29 +91,32 @@ public class ReviewDbStorageTests {
 
         Review updated = reviewStorage.update(review1);
 
-        assertEquals(review1.getReviewId(), updated.getReviewId());
-        assertEquals("Обновленный контент", updated.getContent());
-        assertFalse(updated.getIsPositive());
+        assertThat(updated.getReviewId()).isEqualTo(review1.getReviewId());
+        assertThat(updated.getContent()).isEqualTo("Обновленный контент");
+        assertThat(updated.getIsPositive()).isFalse();
     }
 
     @Test
     void getById_shouldReturnReviewWhenExists() {
         Optional<Review> found = reviewStorage.getById(review1.getReviewId());
 
-        assertTrue(found.isPresent());
-        assertEquals(review1.getContent(), found.get().getContent());
+        assertThat(found)
+                .isPresent()
+                .get()
+                .extracting(Review::getContent)
+                .isEqualTo(review1.getContent());
     }
 
     @Test
     void getById_shouldReturnEmptyWhenNotExists() {
         Optional<Review> found = reviewStorage.getById(999L);
-        assertTrue(found.isEmpty());
+        assertThat(found).isEmpty();
     }
 
     @Test
     void delete_shouldRemoveReview() {
         reviewStorage.delete(review1.getReviewId());
-        assertTrue(reviewStorage.getById(review1.getReviewId()).isEmpty());
+        assertThat(reviewStorage.getById(review1.getReviewId())).isEmpty();
     }
 
     @Test
@@ -127,59 +130,76 @@ public class ReviewDbStorageTests {
 
         List<Review> reviews = reviewStorage.getReviewsByFilmId(1L, 10);
 
-        assertEquals(2, reviews.size());
-        assertTrue(reviews.stream().anyMatch(r -> r.getReviewId().equals(review1.getReviewId())));
-        assertTrue(reviews.stream().anyMatch(r -> r.getReviewId().equals(anotherReview.getReviewId())));
+        assertThat(reviews)
+                .hasSize(2)
+                .extracting(Review::getReviewId)
+                .contains(review1.getReviewId(), anotherReview.getReviewId());
     }
 
     @Test
     void getReviewsByFilmId_shouldReturnEmptyListWhenNoReviews() {
         List<Review> reviews = reviewStorage.getReviewsByFilmId(999L, 10);
-        assertTrue(reviews.isEmpty());
+        assertThat(reviews).isEmpty();
     }
 
     @Test
     void addLike_shouldIncreaseUseful() {
-        reviewStorage.addLike(review1.getReviewId(), 2L);
+        reviewLikeStorage.addLike(review1.getReviewId(), 2L);
         Optional<Review> updated = reviewStorage.getById(review1.getReviewId());
-        assertTrue(updated.isPresent());
-        assertEquals(1, updated.get().getUseful());
+
+        assertThat(updated)
+                .isPresent()
+                .get()
+                .extracting(Review::getUseful)
+                .isEqualTo(1);
     }
 
     @Test
     void addDislike_shouldDecreaseUseful() {
-        reviewStorage.addDislike(review1.getReviewId(), 2L);
+        reviewLikeStorage.addDislike(review1.getReviewId(), 2L);
         Optional<Review> updated = reviewStorage.getById(review1.getReviewId());
-        assertTrue(updated.isPresent());
-        assertEquals(-1, updated.get().getUseful());
+
+        assertThat(updated)
+                .isPresent()
+                .get()
+                .extracting(Review::getUseful)
+                .isEqualTo(-1);
     }
 
     @Test
     void removeLike_shouldDecreaseUseful() {
-        reviewStorage.addLike(review1.getReviewId(), 2L);
-        reviewStorage.removeLike(review1.getReviewId(), 2L);
+        reviewLikeStorage.addLike(review1.getReviewId(), 2L);
+        reviewLikeStorage.removeLike(review1.getReviewId(), 2L);
         Optional<Review> updated = reviewStorage.getById(review1.getReviewId());
-        assertTrue(updated.isPresent());
-        assertEquals(0, updated.get().getUseful());
+
+        assertThat(updated)
+                .isPresent()
+                .get()
+                .extracting(Review::getUseful)
+                .isEqualTo(0);
     }
 
     @Test
     void removeDislike_shouldIncreaseUseful() {
-        reviewStorage.addDislike(review1.getReviewId(), 2L);
-        reviewStorage.removeDislike(review1.getReviewId(), 2L);
+        reviewLikeStorage.addDislike(review1.getReviewId(), 2L);
+        reviewLikeStorage.removeDislike(review1.getReviewId(), 2L);
         Optional<Review> updated = reviewStorage.getById(review1.getReviewId());
-        assertTrue(updated.isPresent());
-        assertEquals(0, updated.get().getUseful());
+
+        assertThat(updated)
+                .isPresent()
+                .get()
+                .extracting(Review::getUseful)
+                .isEqualTo(0);
     }
 
     @Test
     void getUserReviewRating_shouldReturnRatingWhenExists() {
-        assertNull(reviewStorage.getUserReviewRating(review1.getReviewId(), 2L));
+        assertThat(reviewStorage.getUserReviewRating(review1.getReviewId(), 2L)).isNull();
 
-        reviewStorage.addLike(review1.getReviewId(), 2L);
-        assertTrue(reviewStorage.getUserReviewRating(review1.getReviewId(), 2L));
+        reviewLikeStorage.addLike(review1.getReviewId(), 2L);
+        assertThat(reviewStorage.getUserReviewRating(review1.getReviewId(), 2L)).isTrue();
 
-        reviewStorage.addDislike(review1.getReviewId(), 2L);
-        assertFalse(reviewStorage.getUserReviewRating(review1.getReviewId(), 2L));
+        reviewLikeStorage.addDislike(review1.getReviewId(), 2L);
+        assertThat(reviewStorage.getUserReviewRating(review1.getReviewId(), 2L)).isFalse();
     }
 }
