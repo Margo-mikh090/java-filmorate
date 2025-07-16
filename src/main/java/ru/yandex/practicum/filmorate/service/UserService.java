@@ -39,18 +39,12 @@ public class UserService {
 
     public User create(User user) {
         log.info("Запрос на создание пользователя с данными: {}", user);
-        if (user.getName().isBlank()) {
-            user.setName(user.getLogin());
-        }
-        return userStorage.create(user);
+        return userStorage.create(getUserValidatedName(user));
     }
 
     public User update(User userToUpdate) {
         log.info("Запрос на обновление пользователя с данными: {}", userToUpdate);
-        if (userToUpdate.getName().isBlank()) {
-            userToUpdate.setName(userToUpdate.getLogin());
-        }
-        return userStorage.update(userToUpdate);
+        return userStorage.update(getUserValidatedName(userToUpdate));
     }
 
     public void addFriend(long fromId, long toId) {
@@ -83,5 +77,12 @@ public class UserService {
     public Set<User> getUserFriends(long id) {
         log.info("Запрос на получение списка друзей пользователя с id {}", id);
         return new HashSet<>(friendshipDbStorage.getUserFriends(id));
+    }
+
+    private User getUserValidatedName(User user) {
+        if (user.getName().isBlank()) {
+            user.setName(user.getLogin());
+        }
+        return user;
     }
 }
