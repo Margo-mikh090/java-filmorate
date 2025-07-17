@@ -9,4 +9,6 @@ public interface ReviewLikeStorage {
     void removeLike(Long reviewId, Long userId);
 
     void removeDislike(Long reviewId, Long userId);
+
+    Boolean getUserReviewRating(Long reviewId, Long userId);
 }

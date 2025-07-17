@@ -194,12 +194,12 @@ public class ReviewDbStorageTests {
 
     @Test
     void getUserReviewRating_shouldReturnRatingWhenExists() {
-        assertThat(reviewStorage.getUserReviewRating(review1.getReviewId(), 2L)).isNull();
+        assertThat(reviewLikeStorage.getUserReviewRating(review1.getReviewId(), 2L)).isNull();
 
         reviewLikeStorage.addLike(review1.getReviewId(), 2L);
-        assertThat(reviewStorage.getUserReviewRating(review1.getReviewId(), 2L)).isTrue();
+        assertThat(reviewLikeStorage.getUserReviewRating(review1.getReviewId(), 2L)).isTrue();
 
         reviewLikeStorage.addDislike(review1.getReviewId(), 2L);
-        assertThat(reviewStorage.getUserReviewRating(review1.getReviewId(), 2L)).isFalse();
+        assertThat(reviewLikeStorage.getUserReviewRating(review1.getReviewId(), 2L)).isFalse();
     }
 }

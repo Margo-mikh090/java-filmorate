@@ -103,7 +103,7 @@ public class ReviewService {
     private void validateAndUpdateRating(Long reviewId, Long userId, boolean isLike) {
         validateReviewAndUser(reviewId, userId);
 
-        Boolean currentRating = reviewStorage.getUserReviewRating(reviewId, userId);
+        Boolean currentRating = reviewLikeStorage.getUserReviewRating(reviewId, userId);
         if (currentRating != null && currentRating == isLike) {
             throw new ConditionsNotMetException(String.format(
                     "Пользователь уже поставил %s этому отзыву",
