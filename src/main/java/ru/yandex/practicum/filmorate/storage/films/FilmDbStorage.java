@@ -14,9 +14,11 @@ import ru.yandex.practicum.filmorate.storage.genres.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.mappers.FilmRowMapper;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Repository
 @Primary
@@ -39,6 +41,16 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
             "LEFT JOIN likes AS l ON f.id = l.film_id " +
             "LEFT JOIN mpa AS m ON f.mpa_id = m.id " +
             "WHERE f.id = ? " +
+            "GROUP BY f.id";
+
+    private static final String GETTING_LIST_FILMS = "SELECT f.id, f.name, f.description, " +
+            "f.release_date, f.duration, f.mpa_id, m.name AS mpa_name, ARRAY_AGG(DISTINCT g.genre_id) AS genres, " +
+            "ARRAY_AGG(DISTINCT l.user_id) AS likes " +
+            "FROM films AS f " +
+            "LEFT JOIN film_genres AS g ON f.id = g.film_id " +
+            "LEFT JOIN likes AS l ON f.id = l.film_id " +
+            "LEFT JOIN mpa AS m ON f.mpa_id = m.id " +
+            "WHERE f.id IN (%s) " +
             "GROUP BY f.id";
 
     private static final String DELETE_BY_ID = "DELETE FROM films WHERE id = ?";
@@ -209,6 +221,14 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
             throw new ConditionsNotMetException("Поиск возможен только по параметрам title и director");
         }
         Collection<Film> films = jdbc.query(SEARCH_FILM_QUERY, mapper, searchByDirector, query, searchByTitle, query);
+        return addDirectorsToCollection(films);
+    }
+
+    public Collection<Film> getByList(List<Long> listFilms) {
+        final Collection<Film> films = getAll(String.format(GETTING_LIST_FILMS,
+                listFilms.stream()
+                        .map(String::valueOf)
+                        .collect(Collectors.joining(","))));
         return addDirectorsToCollection(films);
     }
 
