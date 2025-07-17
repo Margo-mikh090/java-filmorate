@@ -30,11 +30,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ConditionsNotMetException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Map<String, String> handleConditionsNotMetException(final ConditionsNotMetException e) {
-        if (e.getMessage().contains("отзыв") || e.getMessage().contains("лайк")) {
-            log.warn("ConditionsNotMetException (Review): {}", e.getMessage());  // Лог для отзывов
-        } else {
-            log.warn("ConditionsNotMetException: {}", e.getMessage());  // Общий лог
-        }
+        log.warn("ConditionsNotMetException: {}", e.getMessage());
         return Map.of("error", e.getMessage());
     }
 
@@ -56,11 +52,7 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Map<String, String> handleDataIntegrityViolation(final DataIntegrityViolationException e) {
         String rootCause = e.getRootCause() != null ? e.getRootCause().getMessage() : e.getMessage();
-        if (rootCause.contains("reviews") || rootCause.contains("review_likes")) {
-            log.warn("DataIntegrityViolationException (Review): {}", rootCause);  // Лог для отзывов
-        } else {
-            log.warn("DataIntegrityViolationException: {}", rootCause);  // Общий лог
-        }
+        log.warn("DataIntegrityViolationException: {}", rootCause);
         return Map.of("error", "Ошибка целостности данных: " + rootCause);
     }
 }

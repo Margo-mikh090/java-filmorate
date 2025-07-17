@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @Repository
-public class ReviewDbStorage extends BaseDbStorage<Review> implements ReviewStorage {
+public class ReviewDbStorage extends BaseDbStorage<Review> implements ReviewStorage, ReviewLikeStorage {
     private final JdbcTemplate jdbc;
     private final ReviewRowMapper reviewRowMapper;
 

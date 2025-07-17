@@ -15,14 +15,4 @@ public interface ReviewStorage {
     Optional<Review> getById(Long id);
 
     List<Review> getReviewsByFilmId(Long filmId, int count);
-
-    void addLike(Long reviewId, Long userId);
-
-    void addDislike(Long reviewId, Long userId);
-
-    void removeLike(Long reviewId, Long userId);
-
-    void removeDislike(Long reviewId, Long userId);
-
-    Boolean getUserReviewRating(Long reviewId, Long userId);
 }
