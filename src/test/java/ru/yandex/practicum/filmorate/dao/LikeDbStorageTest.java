@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
-import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.jdbc.core.JdbcTemplate;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -14,16 +14,13 @@ import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.MPA;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.films.FilmDbStorage;
-import ru.yandex.practicum.filmorate.storage.genres.GenreDbStorage;
 import ru.yandex.practicum.filmorate.storage.likes.LikeDbStorage;
-import ru.yandex.practicum.filmorate.storage.mappers.FilmRowMapper;
-import ru.yandex.practicum.filmorate.storage.mappers.GenreRowMapper;
-import ru.yandex.practicum.filmorate.storage.mappers.UserRowMapper;
 import ru.yandex.practicum.filmorate.storage.users.UserDbStorage;
 
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
@@ -32,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @JdbcTest
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-@Import({LikeDbStorage.class, FilmDbStorage.class, FilmRowMapper.class, GenreDbStorage.class, GenreRowMapper.class, UserDbStorage.class, UserRowMapper.class})
+@ComponentScan(basePackages = "ru.yandex.practicum.filmorate")
 public class LikeDbStorageTest {
     private final LikeDbStorage likeDbStorage;
     private final UserDbStorage userDbStorage;
@@ -96,9 +93,47 @@ public class LikeDbStorageTest {
         int rows = jdbc.queryForObject("SELECT COUNT(*) FROM likes", Integer.class);
         assertThat(rows).isEqualTo(3);
 
-        List<Film> filmsRate = (List<Film>) filmDbStorage.getRating(2);
+        List<Film> filmsRate = (List<Film>) filmDbStorage.getRating(2, null, null);
         assertThat(filmsRate.size()).isEqualTo(2);
 
         assertThat(filmsRate.getFirst().getId()).isEqualTo(film.getId());
+    }
+
+    @Test
+    public void testGetCommonFilms() {
+        User user2 = new User("email@gmail.ru", "newlogin", "name", LocalDate.now());
+        user2 = userDbStorage.create(user2);
+
+        Film film2 = new Film("name2", "description2", LocalDate.now(), 190);
+        film2.setMpa(new MPA(1L, null));
+        Set<Genre> genres = new HashSet<>();
+        genres.add(new Genre(2L, null));
+        genres.add(new Genre(3L, null));
+        film2.setGenres(genres);
+        film2 = filmDbStorage.create(film2);
+
+        likeDbStorage.addLike(user2.getId(), film2.getId());
+        likeDbStorage.addLike(user2.getId(), film.getId());
+        likeDbStorage.addLike(user.getId(), film2.getId());
+
+        List<Film> commonFilms = (List<Film>) filmDbStorage.getCommonFilms(user.getId(), user2.getId());
+        assertThat(commonFilms.size()).isEqualTo(1);
+
+        likeDbStorage.addLike(user.getId(), film.getId());
+        commonFilms = (List<Film>) filmDbStorage.getCommonFilms(user.getId(), user2.getId());
+        assertThat(commonFilms.size()).isEqualTo(2);
+
+        likeDbStorage.removeLike(user2.getId(), film2.getId());
+        likeDbStorage.removeLike(user2.getId(), film.getId());
+
+        commonFilms = (List<Film>) filmDbStorage.getCommonFilms(user.getId(), user2.getId());
+        assertThat(commonFilms.size()).isEqualTo(0);
+    }
+
+    @Test
+    public void testGetAllUserLikes() {
+        Map<Long, Set<Long>> expectedValue = Map.of(user.getId(), Set.of(film.getId()));
+        likeDbStorage.addLike(user.getId(), film.getId());
+        assertThat(likeDbStorage.getAllUserLikes()).isEqualTo(expectedValue);
     }
 }

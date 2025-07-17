@@ -1,11 +1,11 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.annotation.Marker;
-import ru.yandex.practicum.filmorate.exception.ConditionsNotMetException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
@@ -56,11 +56,29 @@ public class FilmController {
     }
 
     @GetMapping("/popular")
-    public List<Film> getRating(@RequestParam(defaultValue = "10") int count) {
-        if (count <= 0) {
-            throw new ConditionsNotMetException("Кол-во фильмов должно быть положительным числом, введенное значение - "
-                    + count);
-        }
-        return filmService.getRating(count);
+    public List<Film> getRating(
+            @RequestParam(defaultValue = "10") long count,
+            @RequestParam(required = false) Integer genreId,
+            @RequestParam(required = false) Integer year) {
+        return filmService.getRating(count, genreId, year);
+    }
+
+    @GetMapping("/director/{directorId}")
+    public List<Film> getDirectorFilm(@PathVariable long directorId,
+                                      @RequestParam(required = false) String sortBy) {
+        return filmService.getDirectorFilm(directorId, sortBy);
+    }
+
+    @GetMapping("/common")
+    public List<Film> getCommonFilms(@RequestParam long userId, @RequestParam long friendId) {
+        return filmService.getCommonFilms(userId, friendId);
+    }
+
+    @GetMapping("/search")
+    public List<Film> searchFilms(@RequestParam(defaultValue = "title,director") @NotBlank String query,
+                                  @RequestParam @NotBlank String by) {
+        boolean searchByTitle = by.contains("title");
+        boolean searchByDirector = by.contains("director");
+        return filmService.searchFilms(query, searchByTitle, searchByDirector);
     }
 }

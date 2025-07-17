@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.exception;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -45,5 +46,13 @@ public class GlobalExceptionHandler {
     public Map<String, String> handleRuntimeException(final InternalServerException e) {
         log.error("Internal server exception: {} with message {}", e.getClass(), e.getMessage());
         return Map.of("error", "Ошибка обновления данных");
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String, String> handleDataIntegrityViolation(final DataIntegrityViolationException e) {
+        String rootCause = e.getRootCause() != null ? e.getRootCause().getMessage() : e.getMessage();
+        log.warn("DataIntegrityViolationException: {}", rootCause);
+        return Map.of("error", "Ошибка целостности данных: " + rootCause);
     }
 }
